@@ -13,9 +13,12 @@ namespace BusinessVerification_Service.Api
             try
             {
                 // Register FirestoreDb as a Singleton
+                //
                 // Only done once per application lifetime as it is for prototyping purposes
-                // Having periodic refresh of the credentials can be added in future versions, 
-                // for performance improvements when the application scales to a more permanent hosting solution
+                //
+                // Having a periodic refresh of the credentials can be added in future
+                // versions of the API for performance improvements when the application
+                // scales to a more permanent hosting solution
                 var credentialPath = builder.Configuration["Firestore:CredentialsPath"];
                 var projectId = builder.Configuration["Firestore:ProjectId"];
                 var googleCredential = GoogleCredential.FromFile(credentialPath);
@@ -34,16 +37,15 @@ namespace BusinessVerification_Service.Api
                 throw;
             }
 
-            // Add services to the container.
+            // Add interfaces of services and helpers to the container
 
             builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
+            // Configure the HTTP request pipeline
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
@@ -51,10 +53,7 @@ namespace BusinessVerification_Service.Api
             }
 
             app.UseAuthorization();
-
-
             app.MapControllers();
-
             app.Run();
         }
     }
