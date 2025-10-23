@@ -1,3 +1,5 @@
+using BusinessVerification_Service.Api.Helpers;
+using BusinessVerification_Service.Api.Interfaces.HelpersInterfaces;
 using Google.Apis.Auth.OAuth2;
 using Google.Cloud.Firestore;
 using Google.Cloud.Firestore.V1;
@@ -12,6 +14,50 @@ namespace BusinessVerification_Service.Api
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            // Retrieve the Google credentials from the file reference
+            // in appsettings.Development.json
+            //
+            // Will be retrieved differently in production
+            string credentialPath, projectId;
+            GoogleCredential googleCredential;
+            try
+            {
+                credentialPath = builder.Configuration["Firestore:CredentialsPath"];
+                projectId = builder.Configuration["Firestore:ProjectId"];
+                googleCredential = GoogleCredential.FromFile(credentialPath);
+                Console.WriteLine("Startup: Successfully retrieved Google credentials.");
+            }
+            catch (Exception exception)
+            {
+                // Stop the program if the Google credentials cannot be loaded
+                Console.WriteLine($"Startup: Failed to retrieve Google credentials: " +
+                    $"{exception.Message}");
+                throw;
+            }
+
+            // Initialize Firebase admin so that it can be used
+            // anywhere in the app
+            //
+            // Protect against duplicates if Firebase app restarts
+            try
+            {
+                if (FirebaseAdmin.FirebaseApp.DefaultInstance == null)
+                {
+                    FirebaseAdmin.FirebaseApp.Create(new FirebaseAdmin.AppOptions
+                    {
+                        Credential = googleCredential
+                    });
+                }
+                Console.WriteLine("Startup: Successfully initialized Firebase admin.");
+            }
+            catch (Exception exception)
+            {
+                // Stop the program if Firebase admin cannot be initialized
+                Console.WriteLine($"Startup: Failed to initialize Firebase admin: " +
+                    $"{exception.Message}");
+                throw;
+            }
+
             try
             {
                 // Register FirestoreDb as a Singleton
@@ -21,21 +67,20 @@ namespace BusinessVerification_Service.Api
                 // Having a periodic refresh of the credentials can be added in future
                 // versions of the API for performance improvements when the application
                 // scales to a more permanent hosting solution
-                string credentialPath = builder.Configuration["Firestore:CredentialsPath"];
-                string projectId = builder.Configuration["Firestore:ProjectId"];
-                GoogleCredential googleCredential = GoogleCredential.FromFile(credentialPath);
                 FirestoreClient firestoreClient = new FirestoreClientBuilder
                 {
                     Credential = googleCredential
                 }.Build();
-                FirestoreDb firestoreDb = FirestoreDb.Create(projectId, client: firestoreClient);
+                FirestoreDb firestoreDb = FirestoreDb.Create(projectId,
+                    client: firestoreClient);
                 builder.Services.AddSingleton(firestoreDb);
-                Console.WriteLine("Connected to Firestore successfully.");
+                Console.WriteLine("Startup: Successfully connected to Firestore.");
             }
-            catch
+            catch (Exception exception)
             {
                 // Stop the program if the connection to Firestore fails
-                Console.WriteLine("Failed to connect to Firestore.");
+                Console.WriteLine($"Startup: Failed to connect to Firestore: " +
+                    $"{exception.Message}");
                 throw;
             }
 
@@ -52,16 +97,18 @@ namespace BusinessVerification_Service.Api
                 await ruleProvider.BuildAsync();
                 DomainParser domainParser = new DomainParser(ruleProvider);
                 builder.Services.AddSingleton<IDomainParser>(domainParser);
-                Console.WriteLine("Downloaded the public suffix list successfully.");
+                Console.WriteLine("Startup: Successfully downloaded the public suffix list.");
             }
-            catch
+            catch (Exception exception)
             {
                 // Stop the program if getting the public suffix list fails
-                Console.WriteLine("Failed to download the public suffix list.");
+                Console.WriteLine($"Startup: Failed to download the public suffix list: " +
+                    $"{exception.Message}");
                 throw;
             }
 
             // Add interfaces of services and helpers to the container
+            builder.Services.AddSingleton<IFirebaseHelper, FirebaseHelper>();
 
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
@@ -81,7 +128,8 @@ namespace BusinessVerification_Service.Api
             // Global middleware to prevent caching for all endpoints
             app.Use(async (context, next) =>
             {
-                context.Response.Headers["Cache-Control"] = "no-store, no-cache, must-revalidate, proxy-revalidate";
+                context.Response.Headers["Cache-Control"] = "no-store, no-cache, " +
+                    "must-revalidate, proxy-revalidate";
                 context.Response.Headers["Pragma"] = "no-cache";
                 context.Response.Headers["Expires"] = "0";
                 context.Response.Headers["Surrogate-Control"] = "no-store";
