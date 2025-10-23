@@ -1,5 +1,6 @@
 ﻿namespace BusinessVerification_Service.Api.Dtos
 {
+    // For returning parsed doamin info
     public class ParsedDomainDto
     {
         public string? RegistrableDomain { get; set; }

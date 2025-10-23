@@ -1,5 +1,7 @@
 using BusinessVerification_Service.Api.Helpers;
 using BusinessVerification_Service.Api.Interfaces.HelpersInterfaces;
+using BusinessVerification_Service.Api.Interfaces.ServicesInterfaces;
+using BusinessVerification_Service.Api.Services;
 using Google.Apis.Auth.OAuth2;
 using Google.Cloud.Firestore;
 using Google.Cloud.Firestore.V1;
@@ -109,6 +111,7 @@ namespace BusinessVerification_Service.Api
 
             // Add interfaces of services and helpers to the container
             builder.Services.AddSingleton<IFirebaseHelper, FirebaseHelper>();
+            builder.Services.AddSingleton<IFirestoreService, FirestoreService>();
 
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();

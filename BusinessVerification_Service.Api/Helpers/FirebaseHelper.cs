@@ -17,5 +17,18 @@ namespace BusinessVerification_Service.Api.Helpers
             // If the decoding succeeds, the token is valid
             return decodedToken != null;
         }
+
+        // Return the realted user UID of the validated token
+        public async Task<string?> GetUserIdFromToken(string authorizationToken)
+        {
+            // Validate the token signature, issuer and expiry
+            // using Firebase public keys
+            FirebaseToken decodedToken = await
+                FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(
+                authorizationToken);
+
+            // Get the user UID from the decoded token
+            return decodedToken?.Uid;
+        }
     }
 }

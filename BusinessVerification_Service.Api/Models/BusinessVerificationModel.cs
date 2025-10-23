@@ -15,16 +15,18 @@ namespace BusinessVerification_Service.Api.Models
     // to enum types in this model
     public class BusinessVerificationModel
     {
-        public string? UserId { get; set; }
+        public string UserId { get; set; }
 
         public int? Attempt { get; set; }
 
         public bool? ErrorOccured { get; set; }
 
-        public bool? EmailVerified { get; set; }
+        public bool EmailVerified { get; set; } = false;
 
         [JsonConverter(typeof(JsonStringEnumConverter))]
-        public UserVerificationStatus? VerificationStatus { get; set; }
+        public UserVerificationStatus VerificationStatus { get; set; }
+            = UserVerificationStatus.NotStarted
+        ;
 
         public int? FuzzyScore { get; set; }
 

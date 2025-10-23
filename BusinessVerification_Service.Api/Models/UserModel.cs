@@ -1,5 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace BusinessVerification_Service.Api.Models
 {
@@ -15,24 +14,25 @@ namespace BusinessVerification_Service.Api.Models
     // to enum types in this model
     public class UserModel
     {
-        public string? UserId { get; set; }
+        public string UserId { get; set; }
 
         public string? Name { get; set; }
 
-        [EmailAddress]
         public string? Email { get; set; }
 
         public string? Website { get; set; }
 
         [JsonConverter(typeof(JsonStringEnumConverter))]
-        public UserRole? Role { get; set; }
+        public UserRole Role { get; set; } = UserRole.Customer;
 
         [JsonConverter(typeof(JsonStringEnumConverter))]
-        public UserVerificationStatus? VerificationStatus { get; set; }
+        public UserVerificationStatus VerificationStatus { get; set; }
+            = UserVerificationStatus.NotStarted
+        ;
 
         public DateTime? VerificationRequestedAt { get; set; }
 
-        public bool? EmailVerified { get; set; }
+        public bool EmailVerified { get; set; } = false;
     }
 
     public enum UserRole
@@ -45,7 +45,8 @@ namespace BusinessVerification_Service.Api.Models
     public enum UserVerificationStatus
     {
         NotStarted,
-        Pending,
+        PendingAdmin,
+        PendingEmail,
         Rejected,
         Accepted
     }
