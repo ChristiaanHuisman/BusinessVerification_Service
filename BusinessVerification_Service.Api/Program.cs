@@ -112,7 +112,12 @@ namespace BusinessVerification_Service.Api
             // Add interfaces of services and helpers to the container
             builder.Services.AddSingleton<IFirebaseHelper, FirebaseHelper>();
             builder.Services.AddSingleton<IFirestoreService, FirestoreService>();
-            builder.Services.AddScoped<IBusinessVerificationService, BusinessVerificationService>();
+            builder.Services.AddSingleton<IDomainNameHelper, DomainNameHelper>();
+            builder.Services.AddSingleton<IWebsiteAddressHelper, WebsiteAddressHelper>();
+            builder.Services.AddSingleton<INormalizationAndValidationHelper,
+                NormalizationAndValidationHelper>();
+            builder.Services.AddScoped<IBusinessVerificationService,
+                BusinessVerificationService>();
 
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();

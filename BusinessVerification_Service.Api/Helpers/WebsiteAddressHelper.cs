@@ -1,6 +1,8 @@
-﻿namespace BusinessVerification_Service.Api.Helpers
+﻿using BusinessVerification_Service.Api.Interfaces.HelpersInterfaces;
+
+namespace BusinessVerification_Service.Api.Helpers
 {
-    public class WebsiteAddressHelper
+    public class WebsiteAddressHelper : IWebsiteAddressHelper
     {
         // Return true if the website address has
         // a supported scheme, only has one scheme,
