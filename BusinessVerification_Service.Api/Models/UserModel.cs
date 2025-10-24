@@ -35,18 +35,6 @@ namespace BusinessVerification_Service.Api.Models
         ;
 
         public bool? EmailVerified { get; set; } = false;
-
-        // Helper methods
-
-        public bool IsBusiness()
-        {
-            return Role == UserRole.Business;
-        }
-
-        public bool IsAdmin()
-        {
-            return Role == UserRole.Admin;
-        }
     }
 
     // Enum declaring

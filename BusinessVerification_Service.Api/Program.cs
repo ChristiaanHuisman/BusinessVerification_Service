@@ -27,7 +27,7 @@ namespace BusinessVerification_Service.Api
                 credentialPath = builder.Configuration["Firestore:CredentialsPath"];
                 projectId = builder.Configuration["Firestore:ProjectId"];
                 googleCredential = GoogleCredential.FromFile(credentialPath);
-                Console.WriteLine("Startup: Successfully retrieved Google credentials.");
+                Console.WriteLine($"Startup: Successfully retrieved Google credentials.");
             }
             catch (Exception exception)
             {
@@ -50,7 +50,7 @@ namespace BusinessVerification_Service.Api
                         Credential = googleCredential
                     });
                 }
-                Console.WriteLine("Startup: Successfully initialized Firebase admin.");
+                Console.WriteLine($"Startup: Successfully initialized Firebase admin.");
             }
             catch (Exception exception)
             {
@@ -76,7 +76,7 @@ namespace BusinessVerification_Service.Api
                 FirestoreDb firestoreDb = FirestoreDb.Create(projectId,
                     client: firestoreClient);
                 builder.Services.AddSingleton(firestoreDb);
-                Console.WriteLine("Startup: Successfully connected to Firestore.");
+                Console.WriteLine($"Startup: Successfully connected to Firestore.");
             }
             catch (Exception exception)
             {
@@ -99,7 +99,7 @@ namespace BusinessVerification_Service.Api
                 await ruleProvider.BuildAsync();
                 DomainParser domainParser = new DomainParser(ruleProvider);
                 builder.Services.AddSingleton<IDomainParser>(domainParser);
-                Console.WriteLine("Startup: Successfully downloaded the public suffix list.");
+                Console.WriteLine($"Startup: Successfully downloaded the public suffix list.");
             }
             catch (Exception exception)
             {
@@ -112,6 +112,7 @@ namespace BusinessVerification_Service.Api
             // Add interfaces of services and helpers to the container
             builder.Services.AddSingleton<IFirebaseHelper, FirebaseHelper>();
             builder.Services.AddSingleton<IFirestoreService, FirestoreService>();
+            builder.Services.AddScoped<IBusinessVerificationService, BusinessVerificationService>();
 
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();

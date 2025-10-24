@@ -8,7 +8,7 @@ namespace BusinessVerification_Service.Api.Dtos
     public class BusinessVerificationResponseDto
     {
         [JsonConverter(typeof(JsonStringEnumConverter))]
-        public UserVerificationStatus VerificationStatus { get; set; }
+        public UserVerificationStatus? VerificationStatus { get; set; }
             = UserVerificationStatus.NotStarted
         ;
 
