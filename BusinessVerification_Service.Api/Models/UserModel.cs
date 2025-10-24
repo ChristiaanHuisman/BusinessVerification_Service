@@ -5,8 +5,6 @@ namespace BusinessVerification_Service.Api.Models
     // Model representing a User document from the Users collection
     // in Firestore
     //
-    // The UserId field is used for identifying the specific User document
-    //
     // Certain fields are optional and may not be present in every document
     // or needed for every operation
     //
@@ -14,8 +12,6 @@ namespace BusinessVerification_Service.Api.Models
     // to enum types in this model
     public class UserModel
     {
-        public string? UserId { get; set; }
-
         public string? Name { get; set; }
 
         public string? Email { get; set; }

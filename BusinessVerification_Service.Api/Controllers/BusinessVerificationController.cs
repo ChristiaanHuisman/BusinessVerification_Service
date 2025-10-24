@@ -19,7 +19,7 @@ namespace BusinessVerification_Service.Api.Controllers
         }
 
         // Standard error message ending for displaying user error messages
-        const string errorMessageEnd = $"Please ensure all account details are correct " +
+        const string errorMessageEnd = "Please ensure all account details are correct " +
             "and try again in a few minutes, contact support if the issue persists.";
 
         // Bind the Authorization header to the authorizationHeader variable
@@ -32,18 +32,18 @@ namespace BusinessVerification_Service.Api.Controllers
 
             try
             {
-                // Call the main service business logic
+                // Call and return the main service business logic
                 responseDto = await _businessVerificationService
                     .BusinessVerificationProcess(authorizationHeader);
+                return Ok(responseDto);
             }
             catch
             {
                 // Handle unexpected errors gracefully
                 responseDto.Message = $"An unexpected error occured during your " +
                     $"business verification request process. {errorMessageEnd}";
+                return StatusCode(500, responseDto);
             }
-
-            return Ok(responseDto);
         }
     }
 }

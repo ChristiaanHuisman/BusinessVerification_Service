@@ -5,13 +5,6 @@ namespace BusinessVerification_Service.Api.Helpers
 {
     public class DomainNameHelper : IDomainNameHelper
     {
-        // Return true if registerable domains are an exact match
-        public bool DomainExactMatch(string emailRegisterableDomain,
-            string websiteRegisterableDomain)
-        {
-            return emailRegisterableDomain == websiteRegisterableDomain;
-        }
-
         // Generic method
         //
         // Return fuzzy match score from 0 to 100

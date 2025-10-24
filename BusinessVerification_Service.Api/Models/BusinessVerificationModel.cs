@@ -5,9 +5,6 @@ namespace BusinessVerification_Service.Api.Models
     // Model representing a BusinessVerification document within
     // a User document of the Users collection in Firestore
     //
-    // The UserId field is used for identifying
-    // the BusinessVerification document of a specific User docment
-    //
     // Certain fields are optional and may not be present in every document
     // or needed for every operation
     //
@@ -15,8 +12,6 @@ namespace BusinessVerification_Service.Api.Models
     // to enum types in this model
     public class BusinessVerificationModel
     {
-        public string? UserId { get; set; }
-
         // Automatically increment attempt number whenever the model
         // is initialized
         private int _AttemptNumber = 0;
@@ -32,7 +27,8 @@ namespace BusinessVerification_Service.Api.Models
 
         // Automatically update the given timestamp when the verification
         // status changes of enum value
-        private UserVerificationStatus _VerificationStatus = UserVerificationStatus.NotStarted;
+        private UserVerificationStatus _VerificationStatus =
+            UserVerificationStatus.NotStarted;
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public UserVerificationStatus VerificationStatus
         {
@@ -54,12 +50,19 @@ namespace BusinessVerification_Service.Api.Models
         // Only updated internally
         public DateTime? VerificationStatusUpdatedAt { get; private set; }
 
+
         // Helper methods
 
         public void SetVerificationStatus(UserModel userModel)
         {
             VerificationStatus = userModel.VerificationStatus
                 ?? UserVerificationStatus.NotStarted;
+        }
+
+        public void SetEmailVerified(UserModel userModel)
+        {
+            EmailVerified = userModel.EmailVerified
+                ?? false;
         }
 
         public void SetVerificationRequestedAt(UserModel userModel)

@@ -3,8 +3,6 @@
     // Model representing an EmailVerificationToken document
     // from the EmailVerificationTokens collection in Firestore
     //
-    // The Token field is used for identifying the specific Token document
-    //
     // Certain fields are optional and may not be present in every document
     // or needed for every operation
     //
@@ -12,8 +10,6 @@
     // to enum types in this model
     public class EmailVerificationTokenModel
     {
-        public string? Token { get; set; }
-
         public string? UserId { get; set; }
 
         public string? Email { get; set; }

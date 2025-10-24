@@ -13,5 +13,14 @@ namespace BusinessVerification_Service.Api.Dtos
         ;
 
         public string? Message { get; set; }
+
+
+        // Helper methods
+
+        public void SetVerificationStatus(UserModel userModel)
+        {
+            VerificationStatus = userModel.VerificationStatus
+                ?? UserVerificationStatus.NotStarted;
+        }
     }
 }
