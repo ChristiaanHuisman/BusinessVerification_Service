@@ -37,12 +37,12 @@ namespace BusinessVerification_Service.Api
                 throw;
             }
 
-            // Initialize Firebase admin so that it can be used
-            // anywhere in the app
-            //
-            // Protect against duplicates if Firebase app restarts
             try
             {
+                // Initialize Firebase admin so that it can be used
+                // anywhere in the app
+                //
+                // Protect against duplicates if Firebase app restarts
                 if (FirebaseAdmin.FirebaseApp.DefaultInstance == null)
                 {
                     FirebaseAdmin.FirebaseApp.Create(new FirebaseAdmin.AppOptions
