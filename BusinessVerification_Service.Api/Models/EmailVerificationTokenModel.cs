@@ -12,7 +12,7 @@
     // to enum types in this model
     public class EmailVerificationTokenModel
     {
-        public string Token { get; set; }
+        public string? Token { get; set; }
 
         public string? UserId { get; set; }
 

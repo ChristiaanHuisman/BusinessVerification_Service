@@ -15,23 +15,56 @@ namespace BusinessVerification_Service.Api.Models
     // to enum types in this model
     public class BusinessVerificationModel
     {
-        public string UserId { get; set; }
+        public string? UserId { get; set; }
 
-        public int? Attempt { get; set; }
+        // Automatically increment attempt number whenever the model
+        // is initialized
+        private int _AttemptNumber = 0;
+        public int AttemptNumber
+        {
+            get => _AttemptNumber;
+            set => _AttemptNumber = value + 1;
+        }
 
-        public bool? ErrorOccured { get; set; }
+        public bool? ErrorOccured { get; set; } = false;
 
-        public bool EmailVerified { get; set; } = false;
+        public bool? EmailVerified { get; set; } = false;
 
+        // Automatically update the given timestamp when the verification
+        // status changes of enum value
+        private UserVerificationStatus _VerificationStatus = UserVerificationStatus.NotStarted;
         [JsonConverter(typeof(JsonStringEnumConverter))]
-        public UserVerificationStatus VerificationStatus { get; set; }
-            = UserVerificationStatus.NotStarted
-        ;
+        public UserVerificationStatus VerificationStatus
+        {
+            get => _VerificationStatus;
+            set
+            {
+                if (_VerificationStatus != value)
+                {
+                    _VerificationStatus = value;
+                    VerificationStatusUpdatedAt = DateTime.UtcNow;
+                }
+            }
+        }
 
         public int? FuzzyScore { get; set; }
 
         public DateTime? VerificationRequestedAt { get; set; }
 
-        public DateTime? VerificationStatusUpdatedAt { get; set; }
+        // Only updated internally
+        public DateTime? VerificationStatusUpdatedAt { get; private set; }
+
+        // Helper methods
+
+        public void SetVerificationStatus(UserModel userModel)
+        {
+            VerificationStatus = userModel.VerificationStatus
+                ?? UserVerificationStatus.NotStarted;
+        }
+
+        public void SetVerificationRequestedAt(UserModel userModel)
+        {
+            VerificationRequestedAt = userModel.VerificationRequestedAt;
+        }
     }
 }

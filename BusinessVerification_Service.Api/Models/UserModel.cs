@@ -14,7 +14,7 @@ namespace BusinessVerification_Service.Api.Models
     // to enum types in this model
     public class UserModel
     {
-        public string UserId { get; set; }
+        public string? UserId { get; set; }
 
         public string? Name { get; set; }
 
@@ -23,17 +23,33 @@ namespace BusinessVerification_Service.Api.Models
         public string? Website { get; set; }
 
         [JsonConverter(typeof(JsonStringEnumConverter))]
-        public UserRole Role { get; set; } = UserRole.Customer;
+        public UserRole? Role { get; set; } = UserRole.Customer;
 
         [JsonConverter(typeof(JsonStringEnumConverter))]
-        public UserVerificationStatus VerificationStatus { get; set; }
+        public UserVerificationStatus? VerificationStatus { get; set; }
             = UserVerificationStatus.NotStarted
         ;
 
         public DateTime? VerificationRequestedAt { get; set; }
+            = DateTime.UtcNow
+        ;
 
-        public bool EmailVerified { get; set; } = false;
+        public bool? EmailVerified { get; set; } = false;
+
+        // Helper methods
+
+        public bool IsBusiness()
+        {
+            return Role == UserRole.Business;
+        }
+
+        public bool IsAdmin()
+        {
+            return Role == UserRole.Admin;
+        }
     }
+
+    // Enum declaring
 
     public enum UserRole
     {

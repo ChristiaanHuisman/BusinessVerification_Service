@@ -32,5 +32,19 @@ namespace BusinessVerification_Service.Api.Services
                 ? documentSnapshot.ConvertTo<T>()
                 : null;
         }
+
+        // Generic method
+        //
+        // Need to carefully specify path to document when calling the method
+        //
+        // Overwrite and merge relevant model to Firestore spcified document
+        public async Task SetDocumentByFirestorePath<T>(string documentPath, T document)
+            where T : class
+        {
+            // Overwrite existing fields, create fields that do not exist, and
+            // do not remove other fields
+            DocumentReference documentReference = _firestoreDb.Document(documentPath);
+            await documentReference.SetAsync(document, SetOptions.MergeAll);
+        }
     }
 }
