@@ -33,7 +33,6 @@
 
   <ItemGroup>
     <Folder Include="ControllersTests\" />
-    <Folder Include="HelpersTests\" />
     <Folder Include="Fixtures\" />
     <Folder Include="DtosTests\" />
     <Folder Include="ModelsTests\" />
