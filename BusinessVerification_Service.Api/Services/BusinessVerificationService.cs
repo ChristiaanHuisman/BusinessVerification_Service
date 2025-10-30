@@ -218,7 +218,7 @@ namespace BusinessVerification_Service.Api.Services
                             // Call method to trigger the email verification process
                             //
                             // This process is not implemented yet, as using a free domain to
-                            // send transactional emails reliably from needs a bit of a
+                            // send transactional emails reliably needs a bit of a
                             // workaround, but it does seem possible in ASP.NET Core
 
                             userModel.VerificationStatus = UserVerificationStatus.PendingEmail;

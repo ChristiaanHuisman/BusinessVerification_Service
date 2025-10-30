@@ -30,7 +30,8 @@ namespace BusinessVerification_Service.Test.HelpersTests
             _output.WriteLine($"Score: {score}");
 
             // Assert
-            Assert.True(score >= 75 && score <= 100, $"Expected high score, got: {score}");
+            Assert.True(score >= 75 && score <= 100, $"Expected score between 75 " +
+                $"and 100, got: {score}");
         }
 
         // Tes for a medium fuzzy score
@@ -46,7 +47,8 @@ namespace BusinessVerification_Service.Test.HelpersTests
             _output.WriteLine($"Score: {score}");
 
             // Assert
-            Assert.True(score >= 35 && score <= 65, $"Expected high score, got: {score}");
+            Assert.True(score >= 35 && score <= 65, $"Expected score between 35 " +
+                $"and 65, got: {score}");
         }
 
         // Test for a low fuzzy score
@@ -62,7 +64,8 @@ namespace BusinessVerification_Service.Test.HelpersTests
             _output.WriteLine($"Score: {score}");
 
             // Assert
-            Assert.True(score >= 0 && score <= 25, $"Expected low score, got: {score}");
+            Assert.True(score >= 0 && score <= 25, $"Expected score between 0 " +
+                $"and 25, got: {score}");
         }
     }
 }
