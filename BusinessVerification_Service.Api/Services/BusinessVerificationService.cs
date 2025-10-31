@@ -218,7 +218,6 @@ namespace BusinessVerification_Service.Api.Services
                     // Execute writing to Firestore documents and returning a response
                     userModel.VerificationStatus = UserVerificationStatus.Rejected;
                     businessVerificationModel.SetVerificationStatus(userModel);
-                    responseDto.SetVerificationStatus(userModel);
                     responseDto.Message = $"Email and website domains do not match. " +
                         $"{errorMessageEnd}";
                     await _firestoreService.SetDocumentByFirestorePath(
@@ -240,7 +239,6 @@ namespace BusinessVerification_Service.Api.Services
                         {
                             userModel.VerificationStatus = UserVerificationStatus.Accepted;
                             businessVerificationModel.SetVerificationStatus(userModel);
-                            responseDto.SetVerificationStatus(userModel);
                         }
                         else
                         {
@@ -252,7 +250,6 @@ namespace BusinessVerification_Service.Api.Services
 
                             userModel.VerificationStatus = UserVerificationStatus.PendingEmail;
                             businessVerificationModel.SetVerificationStatus(userModel);
-                            responseDto.SetVerificationStatus(userModel);
                         }
                     break;
 
@@ -260,14 +257,12 @@ namespace BusinessVerification_Service.Api.Services
                     case >= 65:
                         userModel.VerificationStatus = UserVerificationStatus.PendingAdmin;
                         businessVerificationModel.SetVerificationStatus(userModel);
-                        responseDto.SetVerificationStatus(userModel);
                     break;
 
                     // For a score of <= 64 the business name cannot be verified
                     default:
                         userModel.VerificationStatus = UserVerificationStatus.Rejected;
                         businessVerificationModel.SetVerificationStatus(userModel);
-                        responseDto.SetVerificationStatus(userModel);
                     break;
                 }
 
@@ -277,7 +272,7 @@ namespace BusinessVerification_Service.Api.Services
                 {
                     case UserVerificationStatus.Accepted:
                         responseDto.Message = $"Your business verification request has been " +
-                            $"approved.";
+                            $"approved. The next time you log in, you should be verified.";
                     break;
 
                     case UserVerificationStatus.PendingEmail:
