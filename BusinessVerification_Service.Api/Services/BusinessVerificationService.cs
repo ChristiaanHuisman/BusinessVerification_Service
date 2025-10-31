@@ -40,6 +40,35 @@ namespace BusinessVerification_Service.Api.Services
         const string userCollection = "users";
         const string verificationCollection = "businessVerification";
 
+        // Return an tuple of parsed domain DTOs of email and website
+        public (ParsedDomainDto ParsedEmailDomain, ParsedDomainDto ParsedWebsiteDomain)
+            GetDomainInfo(string emailAddress, string websiteAddress)
+        {
+            // Get the domains from email and website
+            string emailHost = new MailAddress(emailAddress).Host;
+            string websiteHost = new Uri(websiteAddress).Host;
+
+            // Get the parsed domain info for email and website
+            DomainInfo emailDomainInfo = _domainParser.Parse(emailHost);
+            DomainInfo websiteDomainInfo = _domainParser.Parse(websiteHost);
+
+            // Build the DTOs for email and website
+            return (
+                new ParsedDomainDto
+                {
+                    RegistrableDomain = emailDomainInfo.RegistrableDomain,
+                    TopLevelDomain = emailDomainInfo.TopLevelDomain,
+                    Domain = emailDomainInfo.Domain
+                },
+                new ParsedDomainDto
+                {
+                    RegistrableDomain = websiteDomainInfo.RegistrableDomain,
+                    TopLevelDomain = websiteDomainInfo.TopLevelDomain,
+                    Domain = websiteDomainInfo.Domain
+                }
+            );
+        }
+
         // Return a response DTO to send back to the user Flutter app
         public async Task<BusinessVerificationResponseDto> BusinessVerificationProcess(
             string? authorizationHeader)
@@ -291,35 +320,6 @@ namespace BusinessVerification_Service.Api.Services
                     $"business verification request process. {errorMessageEnd}";
                 return responseDto;
             }
-        }
-
-        // Return an tuple of parsed domain DTOs of email and website
-        public (ParsedDomainDto ParsedEmailDomain, ParsedDomainDto ParsedWebsiteDomain)
-            GetDomainInfo(string emailAddress, string websiteAddress)
-        {
-            // Get the domains from email and website
-            string emailHost = new MailAddress(emailAddress).Host;
-            string websiteHost = new Uri(websiteAddress).Host;
-
-            // Get the parsed domain info for email and website
-            DomainInfo emailDomainInfo = _domainParser.Parse(emailHost);
-            DomainInfo websiteDomainInfo = _domainParser.Parse(websiteHost);
-
-            // Build the DTOs for email and website
-            return (
-                new ParsedDomainDto
-                {
-                    RegistrableDomain = emailDomainInfo.RegistrableDomain,
-                    TopLevelDomain = emailDomainInfo.TopLevelDomain,
-                    Domain = emailDomainInfo.Domain
-                },
-                new ParsedDomainDto
-                {
-                    RegistrableDomain = websiteDomainInfo.RegistrableDomain,
-                    TopLevelDomain = websiteDomainInfo.TopLevelDomain,
-                    Domain = websiteDomainInfo.Domain
-                }
-            );
         }
     }
 }

@@ -90,7 +90,8 @@ namespace BusinessVerification_Service.Test.HelpersTests
         // Arrange
         [InlineData("test", null)]
         [InlineData("   ", 1)]
-        public void IsPopulated_ShouldReturnFalse(string? inputString, int? inputInt)
+        public void IsPopulated_ShouldReturnFalse(
+            string? inputString, int? inputInt)
         {
             // Act
             bool result = _helper.IsPopulated(inputString, inputInt);

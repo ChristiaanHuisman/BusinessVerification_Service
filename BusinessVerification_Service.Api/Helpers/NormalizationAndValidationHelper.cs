@@ -22,7 +22,7 @@ namespace BusinessVerification_Service.Api.Helpers
             variable = Regex.Replace(variable, @"\s+", " ");
 
             // Remove punctuation at ends
-            variable = variable.Trim().Trim('.', ',', ';', ':', '!', '?');
+            variable = variable.Trim().Trim('.', ',', ';', ':', '!', '?', '/', '\\', '@');
 
             // Remove diacritics (accents)
             var normalizedVariable = variable.Normalize(NormalizationForm.FormD);
