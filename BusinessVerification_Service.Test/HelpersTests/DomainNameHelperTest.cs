@@ -3,7 +3,7 @@ using Xunit.Abstractions;
 
 namespace BusinessVerification_Service.Test.HelpersTests
 {
-    [Trait("Catagory", "DomainNameHelper Unit Testing")]
+    [Trait("Catagory", "DomainNameHelper Integration Testing")]
     public class DomainNameHelperTest
     {
         // Injected dependencies

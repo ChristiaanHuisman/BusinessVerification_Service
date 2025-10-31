@@ -31,10 +31,4 @@
     <Using Include="Xunit" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="ControllersTests\" />
-    <Folder Include="Fixtures\" />
-    <Folder Include="ServicesTests\" />
-  </ItemGroup>
-
 </Project>

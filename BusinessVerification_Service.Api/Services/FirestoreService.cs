@@ -22,15 +22,23 @@ namespace BusinessVerification_Service.Api.Services
         public async Task<T?> GetDocumentFromFirestore<T>(string documentPath)
             where T : class
         {
-            // Get a snapshot of the specific Firestore document
-            DocumentReference documentReference = _firestoreDb.Document(documentPath);
-            DocumentSnapshot documentSnapshot = await
-                documentReference.GetSnapshotAsync();
+            try
+            {
+                // Get a snapshot of the specific Firestore document
+                DocumentReference documentReference = _firestoreDb.Document(documentPath);
+                DocumentSnapshot documentSnapshot = await
+                    documentReference.GetSnapshotAsync();
 
-            // Return the snapshot as the relevant model
-            return documentSnapshot.Exists
-                ? documentSnapshot.ConvertTo<T>()
-                : null;
+                // Return the snapshot as the relevant model
+                return documentSnapshot.Exists
+                    ? documentSnapshot.ConvertTo<T>()
+                    : null;
+            }
+            catch
+            {
+                // If the document does not exist
+                return null;
+            }
         }
 
         // Generic method

@@ -14,7 +14,7 @@ namespace BusinessVerification_Service.Api
     {
         public static async Task Main(string[] args)
         {
-            var builder = WebApplication.CreateBuilder(args);
+            WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
             // Retrieve the Google credentials from the file reference
             // in appsettings.Development.json
@@ -95,9 +95,9 @@ namespace BusinessVerification_Service.Api
                 // Caching the public suffix list periodically can be added in future
                 // verisons for performance improvements when the application scales
                 // to a more permanent hosting solution
-                SimpleHttpRuleProvider ruleProvider = new SimpleHttpRuleProvider();
+                SimpleHttpRuleProvider ruleProvider = new();
                 await ruleProvider.BuildAsync();
-                DomainParser domainParser = new DomainParser(ruleProvider);
+                DomainParser domainParser = new(ruleProvider);
                 builder.Services.AddSingleton<IDomainParser>(domainParser);
                 Console.WriteLine($"Startup: Successfully downloaded the public suffix list.");
             }
@@ -137,10 +137,10 @@ namespace BusinessVerification_Service.Api
             // Global middleware to prevent caching for all endpoints
             app.Use(async (context, next) =>
             {
-                context.Response.Headers["Cache-Control"] = "no-store, no-cache, " +
+                context.Response.Headers.CacheControl = "no-store, no-cache, " +
                     "must-revalidate, proxy-revalidate";
-                context.Response.Headers["Pragma"] = "no-cache";
-                context.Response.Headers["Expires"] = "0";
+                context.Response.Headers.Pragma = "no-cache";
+                context.Response.Headers.Expires = "0";
                 context.Response.Headers["Surrogate-Control"] = "no-store";
                 await next();
             });

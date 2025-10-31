@@ -41,32 +41,40 @@ namespace BusinessVerification_Service.Api.Services
         const string verificationCollection = "businessVerification";
 
         // Return an tuple of parsed domain DTOs of email and website
-        public (ParsedDomainDto ParsedEmailDomain, ParsedDomainDto ParsedWebsiteDomain)
+        public (ParsedDomainDto? ParsedEmailDomain, ParsedDomainDto? ParsedWebsiteDomain)
             GetDomainInfo(string emailAddress, string websiteAddress)
         {
-            // Get the domains from email and website
-            string emailHost = new MailAddress(emailAddress).Host;
-            string websiteHost = new Uri(websiteAddress).Host;
+            try
+            {
+                // Get the domains from email and website
+                string emailHost = new MailAddress(emailAddress).Host;
+                string websiteHost = new Uri(websiteAddress).Host;
 
-            // Get the parsed domain info for email and website
-            DomainInfo emailDomainInfo = _domainParser.Parse(emailHost);
-            DomainInfo websiteDomainInfo = _domainParser.Parse(websiteHost);
+                // Get the parsed domain info for email and website
+                DomainInfo emailDomainInfo = _domainParser.Parse(emailHost);
+                DomainInfo websiteDomainInfo = _domainParser.Parse(websiteHost);
 
-            // Build the DTOs for email and website
-            return (
-                new ParsedDomainDto
-                {
-                    RegistrableDomain = emailDomainInfo.RegistrableDomain,
-                    TopLevelDomain = emailDomainInfo.TopLevelDomain,
-                    Domain = emailDomainInfo.Domain
-                },
-                new ParsedDomainDto
-                {
-                    RegistrableDomain = websiteDomainInfo.RegistrableDomain,
-                    TopLevelDomain = websiteDomainInfo.TopLevelDomain,
-                    Domain = websiteDomainInfo.Domain
-                }
-            );
+                // Build the DTOs for email and website
+                return (
+                    new ParsedDomainDto
+                    {
+                        RegistrableDomain = emailDomainInfo.RegistrableDomain,
+                        TopLevelDomain = emailDomainInfo.TopLevelDomain,
+                        Domain = emailDomainInfo.Domain
+                    },
+                    new ParsedDomainDto
+                    {
+                        RegistrableDomain = websiteDomainInfo.RegistrableDomain,
+                        TopLevelDomain = websiteDomainInfo.TopLevelDomain,
+                        Domain = websiteDomainInfo.Domain
+                    }
+                );
+            }
+            catch
+            {
+                // If an error occurs with parsing or input has invalid formatting
+                return (null, null);
+            }
         }
 
         // Return a response DTO to send back to the user Flutter app
@@ -190,21 +198,16 @@ namespace BusinessVerification_Service.Api.Services
                     userModel.Website);
 
                 // Get tuple of parsed domain DTOs for email and website addresses
-                (ParsedDomainDto parsedEmailDomain, ParsedDomainDto parsedWebsiteDomain) =
+                (ParsedDomainDto? parsedEmailDomain, ParsedDomainDto? parsedWebsiteDomain) =
                     GetDomainInfo(userModel.Email, userModel.Website);
 
                 // Handle errors in domain parsing for email and website or invalid formats
-                if (parsedEmailDomain == null
-                    || string.IsNullOrWhiteSpace(parsedEmailDomain.RegistrableDomain)
-                    || parsedEmailDomain.RegistrableDomain == parsedEmailDomain.TopLevelDomain
-                    || parsedWebsiteDomain == null
-                    || string.IsNullOrWhiteSpace(parsedWebsiteDomain.RegistrableDomain)
-                    || parsedWebsiteDomain.RegistrableDomain == parsedWebsiteDomain.TopLevelDomain)
+                if (parsedEmailDomain == null || parsedWebsiteDomain == null)
                 {
                     // Execute writing to Firestore documents and returning a response
                     businessVerificationModel.ErrorOccured = true;
-                    responseDto.Message = $"Website address could not be processed properly and " +
-                        $"might have an invalid format. {errorMessageEnd}";
+                    responseDto.Message = $"Email or website address could not be processed " +
+                        $"properly and might have an invalid format. {errorMessageEnd}";
                     await _firestoreService.SetDocumentByFirestorePath(
                         firestoreUserDocumentPath, userModel);
                     await _firestoreService.SetDocumentByFirestorePath(

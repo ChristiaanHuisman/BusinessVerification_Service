@@ -8,7 +8,7 @@ namespace BusinessVerification_Service.Api.Interfaces.ServicesInterfaces
         Task<BusinessVerificationResponseDto> BusinessVerificationProcess(
             string authorizationToken);
 
-        (ParsedDomainDto ParsedEmailDomain, ParsedDomainDto ParsedWebsiteDomain)
+        (ParsedDomainDto? ParsedEmailDomain, ParsedDomainDto? ParsedWebsiteDomain)
             GetDomainInfo(string emailAddress, string websiteAddress);
     }
 }
