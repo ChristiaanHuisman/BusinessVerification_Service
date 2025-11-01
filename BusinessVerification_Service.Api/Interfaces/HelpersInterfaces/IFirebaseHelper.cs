@@ -1,10 +1,12 @@
-﻿namespace BusinessVerification_Service.Api.Interfaces.HelpersInterfaces
+﻿using FirebaseAdmin.Auth;
+
+namespace BusinessVerification_Service.Api.Interfaces.HelpersInterfaces
 {
     // Include methods from the helper
     public interface IFirebaseHelper
     {
-        Task<bool> VerifyAuthorizationToken(string authorizationToken);
+        Task<FirebaseToken?> GetDecodedAuthorizationToken(string authorizationToken);
 
-        Task<string?> GetUserIdFromToken(string authorizationToken);
+        string? GetUserIdFromToken(FirebaseToken? decodedToken);
     }
 }

@@ -34,7 +34,7 @@ namespace BusinessVerification_Service.Test.HelpersTests
                 $"and 100, got: {score}");
         }
 
-        // Tes for a medium fuzzy score
+        // Test for a medium fuzzy score
         [Fact]
         public void FuzzyMatchScore_ShouldBeMedium()
         {

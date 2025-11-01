@@ -123,7 +123,21 @@ namespace BusinessVerification_Service.Api
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
-            var app = builder.Build();
+            // Enable CORS
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAll",
+                    policy => policy
+                    .AllowAnyOrigin()
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()
+                );
+            });
+
+            WebApplication app = builder.Build();
+
+            // Use CORS
+            app.UseCors("AllowAll");
 
             // Configure the HTTP request pipeline
             if (app.Environment.IsDevelopment())

@@ -1,39 +1,40 @@
-﻿using System.Text.Json.Serialization;
+﻿using Google.Cloud.Firestore;
 
 namespace BusinessVerification_Service.Api.Models
 {
-    // Model representing a User document from the Users collection
-    // in Firestore
-    //
-    // Certain fields are optional and may not be present in every document
-    // or needed for every operation
-    //
-    // Certain string fields in Firestore should be converted
-    // to enum types in this model
+    // Model representing a User document from Firestore
+    [FirestoreData]
     public class UserModel
     {
+        public UserModel() { }
+
+        [FirestoreProperty]
         public string? Name { get; set; }
 
+        [FirestoreProperty]
         public string? Email { get; set; }
 
+        [FirestoreProperty]
         public string? Website { get; set; }
 
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        public UserRole? Role { get; set; } = UserRole.Customer;
+        // Non-nullable enum, Firestore will store as string
+        [FirestoreProperty(ConverterType = typeof(
+            Services.FirestoreService.FirestoreEnumStringConverter<UserRole>))]
+        public UserRole Role { get; set; } = UserRole.Customer;
 
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        public UserVerificationStatus? VerificationStatus { get; set; }
-            = UserVerificationStatus.NotStarted
-        ;
+        // Enum stored as string
+        [FirestoreProperty(ConverterType = typeof(
+            Services.FirestoreService.FirestoreEnumStringConverter<UserVerificationStatus>))]
+        public UserVerificationStatus VerificationStatus { get; set; }
+            = UserVerificationStatus.NotStarted;
 
+        // Nullable timestamp
+        [FirestoreProperty]
         public DateTime? VerificationRequestedAt { get; set; }
-            = DateTime.UtcNow
-        ;
 
+        [FirestoreProperty]
         public bool? EmailVerified { get; set; } = false;
     }
-
-    // Enum declaring
 
     public enum UserRole
     {
@@ -51,3 +52,4 @@ namespace BusinessVerification_Service.Api.Models
         Accepted
     }
 }
+

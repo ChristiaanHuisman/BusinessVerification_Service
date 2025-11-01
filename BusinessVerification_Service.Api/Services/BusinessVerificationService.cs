@@ -2,6 +2,8 @@
 using BusinessVerification_Service.Api.Interfaces.HelpersInterfaces;
 using BusinessVerification_Service.Api.Interfaces.ServicesInterfaces;
 using BusinessVerification_Service.Api.Models;
+using FirebaseAdmin.Auth;
+using Google.Cloud.Firestore;
 using Nager.PublicSuffix;
 using System.Net.Mail;
 
@@ -87,7 +89,8 @@ namespace BusinessVerification_Service.Api.Services
             try
             {
                 // Remove tag or set as null
-                string? authorizationToken = authorizationHeader?.Replace("Bearer ", "");
+                string? authorizationToken = authorizationHeader?
+                    .Trim().Replace("Bearer ", "");
                 if (string.IsNullOrWhiteSpace(authorizationToken))
                 {
                     // Returning a response
@@ -96,8 +99,10 @@ namespace BusinessVerification_Service.Api.Services
                     return responseDto;
                 }
 
-                // Check token validity
-                if (!await _firebaseHelper.VerifyAuthorizationToken(authorizationToken))
+                // Check token validity and get the decoded token
+                FirebaseToken? decodedToken = await _firebaseHelper.GetDecodedAuthorizationToken(
+                    authorizationToken);
+                if (decodedToken == null)
                 {
                     // Returning a response
                     responseDto.Message = $"Could not verify authorization token. " +
@@ -106,11 +111,11 @@ namespace BusinessVerification_Service.Api.Services
                 }
 
                 // Get the relevant user ID
-                string? userId = await _firebaseHelper.GetUserIdFromToken(authorizationToken);
+                string? userId = _firebaseHelper.GetUserIdFromToken(decodedToken);
                 if (userId == null)
                 {
                     // Returning a response
-                    responseDto.Message = $"Could not find user in database. " +
+                    responseDto.Message = $"Could not verify user ID in database. " +
                         $"{errorMessageEnd}";
                     return responseDto;
                 }
@@ -143,6 +148,7 @@ namespace BusinessVerification_Service.Api.Services
                 businessVerificationModel ??= new();
                 businessVerificationModel.SetVerificationRequestedAt(userModel);
                 businessVerificationModel.SetEmailVerified(userModel);
+                businessVerificationModel.AttemptNumber++;
 
                 // Normalize data
                 userModel.Email = _normalizationAndValidationHelper.NormalizeString(
@@ -305,14 +311,16 @@ namespace BusinessVerification_Service.Api.Services
 
                 // Execute writing to Firestore documents and returning a response
                 await _firestoreService.SetDocumentByFirestorePath(
-                        firestoreUserDocumentPath, userModel);
+                    firestoreUserDocumentPath, userModel);
                 await _firestoreService.SetDocumentByFirestorePath(
                     firestoreBusinessVerificationDocumentPath, businessVerificationModel);
                 return responseDto;
             }
             // Handle unexpected errors gracefully
-            catch
+            catch (Exception ex)
             {
+                Console.WriteLine($"[BusinessVerificationService Error] {ex}");
+
                 // Returning a response
                 responseDto.Message = $"An unexpected error occured during your " +
                     $"business verification request process. {errorMessageEnd}";

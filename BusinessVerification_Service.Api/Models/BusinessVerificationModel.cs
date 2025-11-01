@@ -1,68 +1,48 @@
-﻿using System.Text.Json.Serialization;
+﻿using Google.Cloud.Firestore;
 
 namespace BusinessVerification_Service.Api.Models
 {
-    // Model representing a BusinessVerification document within
-    // a User document of the Users collection in Firestore
-    //
-    // Certain fields are optional and may not be present in every document
-    // or needed for every operation
-    //
-    // Certain string fields in Firestore should be converted
-    // to enum types in this model
+    // Model representing a BusinessVerification document
+    [FirestoreData]
     public class BusinessVerificationModel
     {
+        public BusinessVerificationModel() { }
+
         // Automatically increment attempt number whenever the model
         // is initialized
-        private int _AttemptNumber = 0;
-        public int AttemptNumber
-        {
-            get => _AttemptNumber;
-            set => _AttemptNumber = value + 1;
-        }
+        [FirestoreProperty]
+        public int AttemptNumber { get; set; } = 0;
 
+        [FirestoreProperty]
         public bool? ErrorOccured { get; set; } = false;
 
+        [FirestoreProperty]
         public bool? EmailVerified { get; set; } = false;
 
-        // Automatically update the given timestamp when the verification
-        // status changes of enum value
-        private UserVerificationStatus _VerificationStatus =
-            UserVerificationStatus.NotStarted;
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        public UserVerificationStatus VerificationStatus
-        {
-            get => _VerificationStatus;
-            set
-            {
-                if (_VerificationStatus != value)
-                {
-                    _VerificationStatus = value;
-                    VerificationStatusUpdatedAt = DateTime.UtcNow;
-                }
-            }
-        }
+        // Enum stored as string
+        [FirestoreProperty(ConverterType = typeof(Services.FirestoreService.FirestoreEnumStringConverter<UserVerificationStatus>))]
+        public UserVerificationStatus VerificationStatus { get; set; } = UserVerificationStatus.NotStarted;
 
+        [FirestoreProperty]
         public int? FuzzyScore { get; set; }
 
+        [FirestoreProperty]
         public DateTime? VerificationRequestedAt { get; set; }
 
         // Only updated internally
-        public DateTime? VerificationStatusUpdatedAt { get; private set; }
-
+        [FirestoreProperty]
+        public DateTime? VerificationStatusUpdatedAt { get; set; }
 
         // Helper methods
-
         public void SetVerificationStatus(UserModel userModel)
         {
-            VerificationStatus = userModel.VerificationStatus
-                ?? UserVerificationStatus.NotStarted;
+            VerificationStatus = userModel.VerificationStatus;
+            VerificationStatusUpdatedAt = DateTime.UtcNow;
         }
 
         public void SetEmailVerified(UserModel userModel)
         {
-            EmailVerified = userModel.EmailVerified
-                ?? false;
+            EmailVerified = userModel.EmailVerified ?? false;
         }
 
         public void SetVerificationRequestedAt(UserModel userModel)
@@ -71,3 +51,4 @@ namespace BusinessVerification_Service.Api.Models
         }
     }
 }
+
