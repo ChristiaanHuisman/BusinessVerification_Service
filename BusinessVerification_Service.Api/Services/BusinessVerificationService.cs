@@ -151,6 +151,7 @@ namespace BusinessVerification_Service.Api.Services
                 businessVerificationModel.SetVerificationRequestedAt(userModel);
                 businessVerificationModel.SetEmailVerified(userModel);
                 businessVerificationModel.errorOccured = false;
+                businessVerificationModel.fuzzyScore = null;
                 businessVerificationModel.attemptNumber++;
 
                 // Normalize data
@@ -243,9 +244,11 @@ namespace BusinessVerification_Service.Api.Services
                 int fuzzyScore = _domainNameHelper.FuzzyMatchScore(parsedEmailDomain.domain,
                     businessName);
                 businessVerificationModel.fuzzyScore = fuzzyScore;
+
+                // Email verification needs to take place before admin verification if needed
                 switch (fuzzyScore)
                 {
-                    // For a score of >= 95 the business name can be automatically verified
+                    // For a score of >= 90 the business name can be automatically verified
                     case >= 90:
                         if (userModel.emailVerified == true)
                         {
@@ -265,13 +268,27 @@ namespace BusinessVerification_Service.Api.Services
                         }
                     break;
 
-                    // For a score of >= 65 and <= 89 an admin needs to verify the business name
-                    case >= 65:
-                        userModel.verificationStatus = userVerificationStatus.pendingAdmin;
-                        businessVerificationModel.SetVerificationStatus(userModel);
+                    // For a score of >= 60 and <= 89 an admin needs to verify the business name
+                    case >= 60:
+                        if (userModel.emailVerified == true)
+                        {
+                            userModel.verificationStatus = userVerificationStatus.pendingAdmin;
+                            businessVerificationModel.SetVerificationStatus(userModel);
+                        }
+                        else
+                        {
+                            // Call method to trigger the email verification process
+                            //
+                            // This process is not implemented yet, as using a free domain to
+                            // send transactional emails reliably needs a bit of a
+                            // workaround, but it does seem possible in ASP.NET Core
+
+                            userModel.verificationStatus = userVerificationStatus.pendingEmail;
+                            businessVerificationModel.SetVerificationStatus(userModel);
+                        }
                     break;
 
-                    // For a score of <= 64 the business name cannot be verified
+                    // For a score of <= 59 the business name cannot be verified
                     default:
                         userModel.verificationStatus = userVerificationStatus.rejected;
                         businessVerificationModel.SetVerificationStatus(userModel);
