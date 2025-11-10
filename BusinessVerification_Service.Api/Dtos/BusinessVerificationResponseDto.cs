@@ -4,6 +4,6 @@
     // to the user Flutter app
     public class BusinessVerificationResponseDto
     {
-        public string? Message { get; set; }
+        public string? message { get; set; }
     }
 }

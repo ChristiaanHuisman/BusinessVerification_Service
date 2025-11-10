@@ -3,10 +3,10 @@
     // For returning parsed doamin info
     public class ParsedDomainDto
     {
-        public string? RegistrableDomain { get; set; }
+        public string? registrableDomain { get; set; }
 
-        public string? TopLevelDomain { get; set; }
+        public string? topLevelDomain { get; set; }
 
-        public string? Domain { get; set; }
+        public string? domain { get; set; }
     }
 }

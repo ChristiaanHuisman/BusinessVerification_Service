@@ -2,54 +2,54 @@
 
 namespace BusinessVerification_Service.Api.Models
 {
-    // Model representing a User document from Firestore
+    // Model representing user document from Firestore
     [FirestoreData]
     public class UserModel
     {
         public UserModel() { }
 
         [FirestoreProperty]
-        public string? Name { get; set; }
+        public string? name { get; set; }
 
         [FirestoreProperty]
-        public string? Email { get; set; }
+        public string? email { get; set; }
 
         [FirestoreProperty]
-        public string? Website { get; set; }
-
-        // Non-nullable enum, Firestore will store as string
-        [FirestoreProperty(ConverterType = typeof(
-            Services.FirestoreService.FirestoreEnumStringConverter<UserRole>))]
-        public UserRole Role { get; set; } = UserRole.Customer;
+        public string? website { get; set; }
 
         // Enum stored as string
         [FirestoreProperty(ConverterType = typeof(
-            Services.FirestoreService.FirestoreEnumStringConverter<UserVerificationStatus>))]
-        public UserVerificationStatus VerificationStatus { get; set; }
-            = UserVerificationStatus.NotStarted;
+            Services.FirestoreService.FirestoreEnumStringConverter<userRole>))]
+        public userRole role { get; set; } = userRole.customer;
 
-        // Nullable timestamp
-        [FirestoreProperty]
-        public DateTime? VerificationRequestedAt { get; set; }
+        // Enum stored as string
+        [FirestoreProperty(ConverterType = typeof(
+            Services.FirestoreService.FirestoreEnumStringConverter<userVerificationStatus>))]
+        public userVerificationStatus verificationStatus { get; set; }
+            = userVerificationStatus.notStarted
+        ;
 
         [FirestoreProperty]
-        public bool? EmailVerified { get; set; } = false;
+        public DateTime? verificationRequestedAt { get; set; }
+
+        [FirestoreProperty]
+        public bool emailVerified { get; set; } = false;
     }
 
-    public enum UserRole
+    // Enums
+    public enum userRole
     {
-        Customer,
-        Business,
-        Admin
+        customer,
+        business,
+        admin
     }
 
-    public enum UserVerificationStatus
+    public enum userVerificationStatus
     {
-        NotStarted,
-        PendingAdmin,
-        PendingEmail,
-        Rejected,
-        Accepted
+        notStarted,
+        pendingAdmin,
+        pendingEmail,
+        rejected,
+        accepted
     }
 }
-

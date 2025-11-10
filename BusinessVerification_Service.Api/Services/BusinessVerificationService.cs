@@ -3,7 +3,6 @@ using BusinessVerification_Service.Api.Interfaces.HelpersInterfaces;
 using BusinessVerification_Service.Api.Interfaces.ServicesInterfaces;
 using BusinessVerification_Service.Api.Models;
 using FirebaseAdmin.Auth;
-using Google.Cloud.Firestore;
 using Nager.PublicSuffix;
 using System.Net.Mail;
 
@@ -56,20 +55,20 @@ namespace BusinessVerification_Service.Api.Services
                 DomainInfo emailDomainInfo = _domainParser.Parse(emailHost);
                 DomainInfo websiteDomainInfo = _domainParser.Parse(websiteHost);
 
-                // Build the DTOs for email and website
+                // Check for nulls and build the DTOs for email and website
                 return (
-                    new ParsedDomainDto
+                    emailDomainInfo != null ? new ParsedDomainDto
                     {
-                        RegistrableDomain = emailDomainInfo.RegistrableDomain,
-                        TopLevelDomain = emailDomainInfo.TopLevelDomain,
-                        Domain = emailDomainInfo.Domain
-                    },
-                    new ParsedDomainDto
+                        registrableDomain = emailDomainInfo.RegistrableDomain,
+                        topLevelDomain = emailDomainInfo.TopLevelDomain,
+                        domain = emailDomainInfo.Domain
+                    } : null,
+                    websiteDomainInfo != null ? new ParsedDomainDto
                     {
-                        RegistrableDomain = websiteDomainInfo.RegistrableDomain,
-                        TopLevelDomain = websiteDomainInfo.TopLevelDomain,
-                        Domain = websiteDomainInfo.Domain
-                    }
+                        registrableDomain = websiteDomainInfo.RegistrableDomain,
+                        topLevelDomain = websiteDomainInfo.TopLevelDomain,
+                        domain = websiteDomainInfo.Domain
+                    } : null
                 );
             }
             catch
@@ -94,7 +93,7 @@ namespace BusinessVerification_Service.Api.Services
                 if (string.IsNullOrWhiteSpace(authorizationToken))
                 {
                     // Returning a response
-                    responseDto.Message = $"Missing or invalid authorization token. " +
+                    responseDto.message = $"Missing or invalid authorization token. " +
                         $"{errorMessageEnd}";
                     return responseDto;
                 }
@@ -105,7 +104,7 @@ namespace BusinessVerification_Service.Api.Services
                 if (decodedToken == null)
                 {
                     // Returning a response
-                    responseDto.Message = $"Could not verify authorization token. " +
+                    responseDto.message = $"Could not verify authorization token. " +
                         $"{errorMessageEnd}";
                     return responseDto;
                 }
@@ -115,7 +114,7 @@ namespace BusinessVerification_Service.Api.Services
                 if (userId == null)
                 {
                     // Returning a response
-                    responseDto.Message = $"Could not verify user ID in database. " +
+                    responseDto.message = $"Could not verify user ID in database. " +
                         $"{errorMessageEnd}";
                     return responseDto;
                 }
@@ -124,51 +123,55 @@ namespace BusinessVerification_Service.Api.Services
                 string firestoreUserDocumentPath = $"{userCollection}/{userId}";
                 string firestoreBusinessVerificationDocumentPath = $"{userCollection}/" +
                     $"{userId}/{verificationCollection}/{userId}";
-
+                
                 // Retrieve documents from Firestore and convert to relevant models
                 UserModel? userModel = await _firestoreService.GetDocumentFromFirestore<UserModel>(
                     firestoreUserDocumentPath);
                 if (userModel == null)
                 {
                     // Returning a response
-                    responseDto.Message = $"Could not find user in database. " +
+                    responseDto.message = $"Could not find user in database. " +
                         $"{errorMessageEnd}";
                     return responseDto;
                 }
-                else if (userModel.Role != UserRole.Business)
+                else if (userModel.role != userRole.business)
                 {
                     // Returning a response
-                    responseDto.Message = $"Only business accounts can request business " +
+                    responseDto.message = $"Only business accounts can request business " +
                         $"verification. {errorMessageEnd}";
                     return responseDto;
                 }
+                userModel.verificationRequestedAt = DateTime.UtcNow;
+
+                // Set up relavent business verification model
                 BusinessVerificationModel? businessVerificationModel = await
                     _firestoreService.GetDocumentFromFirestore<BusinessVerificationModel>(
                     firestoreBusinessVerificationDocumentPath);
                 businessVerificationModel ??= new();
                 businessVerificationModel.SetVerificationRequestedAt(userModel);
                 businessVerificationModel.SetEmailVerified(userModel);
-                businessVerificationModel.AttemptNumber++;
+                businessVerificationModel.errorOccured = false;
+                businessVerificationModel.attemptNumber++;
 
                 // Normalize data
-                userModel.Email = _normalizationAndValidationHelper.NormalizeString(
-                    userModel.Email);
-                userModel.Email = _normalizationAndValidationHelper.RemoveAllWhitespace(
-                    userModel.Email);
-                userModel.Website = _normalizationAndValidationHelper.NormalizeString(
-                    userModel.Website);
-                userModel.Website = _normalizationAndValidationHelper.RemoveAllWhitespace(
-                    userModel.Website);
+                userModel.email = _normalizationAndValidationHelper.NormalizeString(
+                    userModel.email);
+                userModel.email = _normalizationAndValidationHelper.RemoveAllWhitespace(
+                    userModel.email);
+                userModel.website = _normalizationAndValidationHelper.NormalizeString(
+                    userModel.website);
+                userModel.website = _normalizationAndValidationHelper.RemoveAllWhitespace(
+                    userModel.website);
                 string? businessName = _normalizationAndValidationHelper.NormalizeString(
-                    userModel.Name);
+                    userModel.name);
 
                 // Validate data exists
                 if (!_normalizationAndValidationHelper.IsPopulated(
-                    userModel.Email, userModel.Website, businessName))
+                    userModel.email, userModel.website, businessName))
                 {
                     // Execute writing to Firestore documents and returning a response
-                    businessVerificationModel.ErrorOccured = true;
-                    responseDto.Message = $"Some user data is missing. {errorMessageEnd}";
+                    businessVerificationModel.errorOccured = true;
+                    responseDto.message = $"Some user data is missing. {errorMessageEnd}";
                     await _firestoreService.SetDocumentByFirestorePath(
                         firestoreUserDocumentPath, userModel);
                     await _firestoreService.SetDocumentByFirestorePath(
@@ -177,22 +180,22 @@ namespace BusinessVerification_Service.Api.Services
                 }
 
                 // Validate email and website format
-                if (!_normalizationAndValidationHelper.IsValidEmailAddress(userModel.Email))
+                if (!_normalizationAndValidationHelper.IsValidEmailAddress(userModel.email))
                 {
                     // Execute writing to Firestore documents and returning a response
-                    businessVerificationModel.ErrorOccured = true;
-                    responseDto.Message = $"Invalid email address received. {errorMessageEnd}";
+                    businessVerificationModel.errorOccured = true;
+                    responseDto.message = $"Invalid email address received. {errorMessageEnd}";
                     await _firestoreService.SetDocumentByFirestorePath(
                         firestoreUserDocumentPath, userModel);
                     await _firestoreService.SetDocumentByFirestorePath(
                         firestoreBusinessVerificationDocumentPath, businessVerificationModel);
                     return responseDto;
                 }
-                if (!_websiteAddressHelper.VerifyWebsiteAddressScheme(userModel.Website))
+                if (!_websiteAddressHelper.VerifyWebsiteAddressScheme(userModel.website))
                 {
                     // Execute writing to Firestore documents and returning a response
-                    businessVerificationModel.ErrorOccured = true;
-                    responseDto.Message = $"Invalid website address scheme received. " +
+                    businessVerificationModel.errorOccured = true;
+                    responseDto.message = $"Invalid website address scheme received. " +
                         $"{errorMessageEnd}";
                     await _firestoreService.SetDocumentByFirestorePath(
                         firestoreUserDocumentPath, userModel);
@@ -200,19 +203,19 @@ namespace BusinessVerification_Service.Api.Services
                         firestoreBusinessVerificationDocumentPath, businessVerificationModel);
                     return responseDto;
                 }
-                userModel.Website = _websiteAddressHelper.BuildUriWebsiteAddress(
-                    userModel.Website);
+                userModel.website = _websiteAddressHelper.BuildUriWebsiteAddress(
+                    userModel.website);
 
                 // Get tuple of parsed domain DTOs for email and website addresses
                 (ParsedDomainDto? parsedEmailDomain, ParsedDomainDto? parsedWebsiteDomain) =
-                    GetDomainInfo(userModel.Email, userModel.Website);
+                    GetDomainInfo(userModel.email, userModel.website);
 
                 // Handle errors in domain parsing for email and website or invalid formats
                 if (parsedEmailDomain == null || parsedWebsiteDomain == null)
                 {
                     // Execute writing to Firestore documents and returning a response
-                    businessVerificationModel.ErrorOccured = true;
-                    responseDto.Message = $"Email or website address could not be processed " +
+                    businessVerificationModel.errorOccured = true;
+                    responseDto.message = $"Email or website address could not be processed " +
                         $"properly and might have an invalid format. {errorMessageEnd}";
                     await _firestoreService.SetDocumentByFirestorePath(
                         firestoreUserDocumentPath, userModel);
@@ -222,12 +225,12 @@ namespace BusinessVerification_Service.Api.Services
                 }
 
                 // Use parsed domain information to check if email and website domains match
-                if (parsedEmailDomain.RegistrableDomain != parsedWebsiteDomain.RegistrableDomain)
+                if (parsedEmailDomain.registrableDomain != parsedWebsiteDomain.registrableDomain)
                 {
                     // Execute writing to Firestore documents and returning a response
-                    userModel.VerificationStatus = UserVerificationStatus.Rejected;
+                    userModel.verificationStatus = userVerificationStatus.rejected;
                     businessVerificationModel.SetVerificationStatus(userModel);
-                    responseDto.Message = $"Email and website domains do not match. " +
+                    responseDto.message = $"Email and website domains do not match. " +
                         $"{errorMessageEnd}";
                     await _firestoreService.SetDocumentByFirestorePath(
                         firestoreUserDocumentPath, userModel);
@@ -237,16 +240,16 @@ namespace BusinessVerification_Service.Api.Services
                 }
 
                 // Classify model verification status based on fuzzy score
-                int fuzzyScore = _domainNameHelper.FuzzyMatchScore(parsedEmailDomain.Domain,
+                int fuzzyScore = _domainNameHelper.FuzzyMatchScore(parsedEmailDomain.domain,
                     businessName);
-                businessVerificationModel.FuzzyScore = fuzzyScore;
+                businessVerificationModel.fuzzyScore = fuzzyScore;
                 switch (fuzzyScore)
                 {
                     // For a score of >= 95 the business name can be automatically verified
-                    case >= 95:
-                        if (userModel.EmailVerified == true)
+                    case >= 90:
+                        if (userModel.emailVerified == true)
                         {
-                            userModel.VerificationStatus = UserVerificationStatus.Accepted;
+                            userModel.verificationStatus = userVerificationStatus.accepted;
                             businessVerificationModel.SetVerificationStatus(userModel);
                         }
                         else
@@ -257,53 +260,53 @@ namespace BusinessVerification_Service.Api.Services
                             // send transactional emails reliably needs a bit of a
                             // workaround, but it does seem possible in ASP.NET Core
 
-                            userModel.VerificationStatus = UserVerificationStatus.PendingEmail;
+                            userModel.verificationStatus = userVerificationStatus.pendingEmail;
                             businessVerificationModel.SetVerificationStatus(userModel);
                         }
                     break;
 
-                    // For a score of >= 65 and <= 94 an admin needs to verify the business name
+                    // For a score of >= 65 and <= 89 an admin needs to verify the business name
                     case >= 65:
-                        userModel.VerificationStatus = UserVerificationStatus.PendingAdmin;
+                        userModel.verificationStatus = userVerificationStatus.pendingAdmin;
                         businessVerificationModel.SetVerificationStatus(userModel);
                     break;
 
                     // For a score of <= 64 the business name cannot be verified
                     default:
-                        userModel.VerificationStatus = UserVerificationStatus.Rejected;
+                        userModel.verificationStatus = userVerificationStatus.rejected;
                         businessVerificationModel.SetVerificationStatus(userModel);
                     break;
                 }
 
                 // Assign appropriate message to the response DTO based on
                 // the current model verification status
-                switch (userModel.VerificationStatus)
+                switch (userModel.verificationStatus)
                 {
-                    case UserVerificationStatus.Accepted:
-                        responseDto.Message = $"Your business verification request has been " +
+                    case userVerificationStatus.accepted:
+                        responseDto.message = $"Your business verification request has been " +
                             $"approved. The next time you log in, you should be verified.";
                     break;
 
-                    case UserVerificationStatus.PendingEmail:
-                        responseDto.Message = $"Your business verification request is pending " +
+                    case userVerificationStatus.pendingEmail:
+                        responseDto.message = $"Your business verification request is pending " +
                             $"email confirmation. Please check your inbox periodically for " +
                             $"instructions.";
                     break;
 
-                    case UserVerificationStatus.PendingAdmin:
-                        responseDto.Message = $"Your verification request is pending review " +
+                    case userVerificationStatus.pendingAdmin:
+                        responseDto.message = $"Your verification request is pending review " +
                             $"by an admin. You will be notified once it's processed.";
                     break;
 
-                    case UserVerificationStatus.Rejected:
-                        responseDto.Message = $"Your verification request was rejected due " +
+                    case userVerificationStatus.rejected:
+                        responseDto.message = $"Your verification request was rejected due " +
                             $"to your domains and business name not matching properly. " +
                             $"{errorMessageEnd}";
                     break;
 
                     default:
-                        businessVerificationModel.ErrorOccured = true;
-                        responseDto.Message = $"An unexpected error occured during your " +
+                        businessVerificationModel.errorOccured = true;
+                        responseDto.message = $"An unexpected error occured during your " +
                             $"business verification request process. Thus, your request has " +
                             $"not started yet. {errorMessageEnd}";
                     break;
@@ -317,12 +320,10 @@ namespace BusinessVerification_Service.Api.Services
                 return responseDto;
             }
             // Handle unexpected errors gracefully
-            catch (Exception ex)
+            catch
             {
-                Console.WriteLine($"[BusinessVerificationService Error] {ex}");
-
                 // Returning a response
-                responseDto.Message = $"An unexpected error occured during your " +
+                responseDto.message = $"An unexpected error occured during your " +
                     $"business verification request process. {errorMessageEnd}";
                 return responseDto;
             }

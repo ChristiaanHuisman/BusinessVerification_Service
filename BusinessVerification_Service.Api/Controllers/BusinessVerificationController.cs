@@ -40,7 +40,7 @@ namespace BusinessVerification_Service.Api.Controllers
             catch
             {
                 // Handle unexpected errors gracefully
-                responseDto.Message = $"An unexpected error occured during your " +
+                responseDto.message = $"An unexpected error occured during your " +
                     $"business verification request process. {errorMessageEnd}";
                 return StatusCode(500, responseDto);
             }

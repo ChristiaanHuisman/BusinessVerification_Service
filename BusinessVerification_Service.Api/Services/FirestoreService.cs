@@ -1,7 +1,5 @@
 ﻿using BusinessVerification_Service.Api.Interfaces.ServicesInterfaces;
 using Google.Cloud.Firestore;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace BusinessVerification_Service.Api.Services
 {
@@ -30,25 +28,13 @@ namespace BusinessVerification_Service.Api.Services
                 DocumentReference documentReference = _firestoreDb.Document(documentPath);
                 DocumentSnapshot documentSnapshot = await
                     documentReference.GetSnapshotAsync();
-                if (!documentSnapshot.Exists) return null;
-
-                // Get raw dictionary
-                Dictionary<string, object> documentDictionary
-                    = documentSnapshot.ToDictionary();
-
-                // Do conversions so that model is populated without being case sensitive
-                string json = JsonSerializer.Serialize(documentDictionary);
-                JsonSerializerOptions options = new JsonSerializerOptions
+                if (!documentSnapshot.Exists)
                 {
-                    PropertyNameCaseInsensitive = true,
-                    Converters =
-                    {
-                        new JsonStringEnumConverter(JsonNamingPolicy.CamelCase, true)
-                    }
-                };
+                    return null;
+                }
 
                 // Return the dictionary as the relevant model
-                return JsonSerializer.Deserialize<T>(json, options);
+                return documentSnapshot.ConvertTo<T>();
             }
             catch
             {
@@ -71,21 +57,26 @@ namespace BusinessVerification_Service.Api.Services
             await documentReference.SetAsync(document, SetOptions.MergeAll);
         }
 
+        // Generic method
+        //
         // For successful conversion between model enums and Firestore strings
+        //
+        // Converter that tells Firestore how to store and read enums as strings
+        // instead of the default numeric representation
         public class FirestoreEnumStringConverter<TEnum> : IFirestoreConverter<TEnum>
             where TEnum : struct, Enum
         {
+            // Called when reading data from Firestore to model
             public TEnum FromFirestore(object value)
             {
-                if (value is string s && Enum.TryParse<TEnum>(s, true, out var result))
-                {
-                    return result;
-                }
-                throw new InvalidOperationException($"Cannot convert '{value}' to enum {typeof(TEnum)}");
+                // Try to convert Firestore string to enum
+                return Enum.Parse<TEnum>(value.ToString(), true);
             }
 
+            // Called when reading data from model to Firestore
             public object ToFirestore(TEnum value)
             {
+                // Store the enum as its string name in Firestore
                 return value.ToString();
             }
         }
