@@ -1,4 +1,6 @@
 # Business Verification Service
-This C# ASP.NET Core Web API is my contribution to an education group project. It makes use of xUnit Test, NuGet Packages, Firebase tools, MailerSend and Docker.
-The main focus of the project is a mobile app made with Flutter/Dart. It uses Firebase and a few services writen in C#, Java and Python as its backend, and Firestore as its database.
-I also did the integration of this service with the Flutter app and Firebase.
+This C# ASP.NET Core Web API is my contribution to an education group project. It makes use of xUnit Test, NuGet Packages, Firebase tools, Docker, GitHub Actions and verification emails. The main focus of the project is a mobile app made with Flutter/Dart. It uses Firebase and a few services writen in C#, Java and Python as its backend, and Firestore as its database. I also did the integration of this service with the Flutter app and Firebase and I deployed it to Cloud Run. Visual Studio and Android Studio were used to develop my contributions.
+
+This specific service focuses on comparing email and website address domains and then comparing those with business names to determine if the business requesting verification is a legit business. To do this the service receives a token from the Flutter app of the currently logged in user, with that token it authenticates that it is a valid user making the request from Firebase and retrives that user's relevant information from Firestore. It validates and normalizes the data and then performs the comparisons using the Nager.PublicSuffix and FuzzySharp NuGet Packages. After which it returns a response message to the Flutter app and writes the relevant information back into Firestore.
+
+Additionally the service has the functionality to send verification emails when requested with a free gmail account. When the verification links in these emails are clicked the service will authenticate it and wrtie the relevant information to Firestore.
