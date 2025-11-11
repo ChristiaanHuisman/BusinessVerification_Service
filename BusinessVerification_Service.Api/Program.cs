@@ -16,17 +16,20 @@ namespace BusinessVerification_Service.Api
         {
             WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-            // Retrieve the Google credentials from the file reference
+            // Get Googe credentials from environemnt variable GOOGLE_APPLICATION_CREDENTIALS
+            //
+            // Else retrieve the Google credentials from the file reference
             // in appsettings.Development.json
             //
-            // Will be retrieved differently in production
+            // The same goes for the project ID
             string credentialPath, projectId;
             GoogleCredential googleCredential;
             try
             {
                 credentialPath = Environment.GetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS")
                     ?? builder.Configuration["Firestore:CredentialsPath"];
-                projectId = builder.Configuration["Firestore:ProjectId"];
+                projectId = Environment.GetEnvironmentVariable("FIREBASE_PROJECT_ID")
+                    ?? builder.Configuration["Firestore:ProjectId"];
                 googleCredential = GoogleCredential.FromFile(credentialPath);
                 Console.WriteLine($"Startup: Successfully retrieved Google credentials.");
             }
