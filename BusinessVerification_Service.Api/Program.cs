@@ -24,7 +24,8 @@ namespace BusinessVerification_Service.Api
             GoogleCredential googleCredential;
             try
             {
-                credentialPath = builder.Configuration["Firestore:CredentialsPath"];
+                credentialPath = Environment.GetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS")
+                    ?? builder.Configuration["Firestore:CredentialsPath"];
                 projectId = builder.Configuration["Firestore:ProjectId"];
                 googleCredential = GoogleCredential.FromFile(credentialPath);
                 Console.WriteLine($"Startup: Successfully retrieved Google credentials.");
