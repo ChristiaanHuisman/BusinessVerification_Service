@@ -1,31 +1,63 @@
 using BusinessVerification_Service.Api.Helpers;
 using BusinessVerification_Service.Api.Interfaces.HelpersInterfaces;
 using BusinessVerification_Service.Api.Interfaces.ServicesInterfaces;
+using BusinessVerification_Service.Api.Models;
 using BusinessVerification_Service.Api.Services;
 using Google.Apis.Auth.OAuth2;
 using Google.Cloud.Firestore;
 using Google.Cloud.Firestore.V1;
 using Nager.PublicSuffix;
 using Nager.PublicSuffix.RuleProviders;
+using System.Text.Json;
 
 namespace BusinessVerification_Service.Api
 {
     public class Program
     {
+        // Essential actions like loading credentials, connecting to databases, and
+        // downloading content is done in the startup of the service so that if anything
+        // important fails the service will not start up and cause other errors during
+        // logic runtime
         public static async Task Main(string[] args)
         {
             WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-            // Get Googe credentials from environemnt variable GOOGLE_APPLICATION_CREDENTIALS
-            //
-            // Else retrieve the Google credentials from the file reference
-            // in appsettings.Development.json
-            //
-            // The same goes for the project ID
+            try
+            {
+                // Get email settings from environemnt variable EMAIL_SETTINGS
+                //
+                // Else retrieve the Google credentials from the file reference
+                // in appsettings.Development.json
+                string emailSettingsPath = Environment.GetEnvironmentVariable("EMAIL_SETTINGS")
+                    ?? builder.Configuration["Email:EmailSettingsPath"];
+                if (File.Exists(emailSettingsPath))
+                {
+                    string emailSettingsContent = await File.ReadAllTextAsync(emailSettingsPath);
+                    EmailSettingsModel emailSettings = JsonSerializer.Deserialize<EmailSettingsModel>(
+                        emailSettingsContent);
+                    builder.Services.AddSingleton(emailSettings);
+                }
+                Console.WriteLine($"Startup: Successfully retrieved email settings.");
+            }
+            catch (Exception exception)
+            {
+                // Stop the program if the email settings cannot be loaded
+                Console.WriteLine($"Startup: Failed to retrieve email settings: " +
+                    $"{exception.Message}");
+                throw;
+            }
+
+            // These variables need to be used later on outside of this try catch block
             string credentialPath, projectId;
             GoogleCredential googleCredential;
             try
             {
+                // Get Googe credentials from environemnt variable GOOGLE_APPLICATION_CREDENTIALS
+                //
+                // Else retrieve the Google credentials from the file reference
+                // in appsettings.Development.json
+                //
+                // The same goes for the project ID
                 credentialPath = Environment.GetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS")
                     ?? builder.Configuration["Firestore:CredentialsPath"];
                 projectId = Environment.GetEnvironmentVariable("FIREBASE_PROJECT_ID")

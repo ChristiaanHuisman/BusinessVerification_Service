@@ -1,21 +1,24 @@
-﻿namespace BusinessVerification_Service.Api.Models
+﻿using Google.Cloud.Firestore;
+
+namespace BusinessVerification_Service.Api.Models
 {
-    // Model representing an EmailVerificationToken document
-    // from the EmailVerificationTokens collection in Firestore
-    //
-    // Certain fields are optional and may not be present in every document
-    // or needed for every operation
-    //
-    // Certain string fields in Firestore should be converted
-    // to enum types in this model
+    // Model representing user document from Firestore
+    [FirestoreData]
     public class EmailVerificationTokenModel
     {
-        public string? UserId { get; set; }
+        [FirestoreProperty]
+        public string? verificationToken { get; set; }
 
-        public string? Email { get; set; }
+        [FirestoreProperty]
+        public string? userId { get; set; }
 
-        public DateTime? CreatedAt { get; set; }
+        [FirestoreProperty]
+        public string? email { get; set; }
 
-        public DateTime? ExpiresAt { get; set; }
+        [FirestoreProperty]
+        public DateTime? createdAt { get; set; }
+
+        [FirestoreProperty]
+        public DateTime? expiresAt { get; set; }
     }
 }
