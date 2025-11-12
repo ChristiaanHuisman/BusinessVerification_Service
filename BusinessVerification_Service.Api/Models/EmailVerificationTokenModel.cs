@@ -7,9 +7,6 @@ namespace BusinessVerification_Service.Api.Models
     public class EmailVerificationTokenModel
     {
         [FirestoreProperty]
-        public string? verificationToken { get; set; }
-
-        [FirestoreProperty]
         public string? userId { get; set; }
 
         [FirestoreProperty]
