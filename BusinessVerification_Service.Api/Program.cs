@@ -150,6 +150,7 @@ namespace BusinessVerification_Service.Api
             builder.Services.AddSingleton<IFirestoreService, FirestoreService>();
             builder.Services.AddSingleton<IDomainNameHelper, DomainNameHelper>();
             builder.Services.AddSingleton<IWebsiteAddressHelper, WebsiteAddressHelper>();
+            builder.Services.AddSingleton<ITokenGeneratorHelper, TokenGeneratorHelper>();
             builder.Services.AddSingleton<INormalizationAndValidationHelper,
                 NormalizationAndValidationHelper>();
             builder.Services.AddScoped<IBusinessVerificationService,
