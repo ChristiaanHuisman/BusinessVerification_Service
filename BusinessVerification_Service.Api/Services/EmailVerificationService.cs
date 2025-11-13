@@ -1,4 +1,5 @@
 ﻿using BusinessVerification_Service.Api.Interfaces.HelpersInterfaces;
+using BusinessVerification_Service.Api.Interfaces.ServicesInterfaces;
 using BusinessVerification_Service.Api.Models;
 
 namespace BusinessVerification_Service.Api.Services
@@ -9,17 +10,23 @@ namespace BusinessVerification_Service.Api.Services
         private readonly string _baseUrl;
         private readonly ITokenGeneratorHelper _tokenGeneratorHelper;
         private readonly IEmailHelper _emailHelper;
+        private readonly IFirestoreService _firestoreService;
 
         // Constructor for dependency injection
         public EmailVerificationService(ServiceInformationModel serviceInformationModel,
             ITokenGeneratorHelper tokenGeneratorHelper,
-            IEmailHelper emailHelper)
+            IEmailHelper emailHelper,
+            IFirestoreService firestoreService)
         {
             _baseUrl = serviceInformationModel.baseUrl;
             _tokenGeneratorHelper = tokenGeneratorHelper;
             _emailHelper = emailHelper;
+            _firestoreService = firestoreService;
         }
 
+        // Collection names in Firestore
+        const string emailVerificationTokenCollection = "emailVerificationTokens";
+        
         // Process of sending a verification email upon request, receives a UserModel
         // and the relevant user ID
         //
@@ -55,7 +62,13 @@ namespace BusinessVerification_Service.Api.Services
                 await _emailHelper.SendEmailSmtp(userModel.email,userModel.name,
                     emailSubject, emailHtml);
 
-                // Write EmailVerificationTokenModel to Firestore (method)
+                // Get relevant Firebase document paths
+                string firestoreEmailVerificationTokenDocumentPath =
+                    $"{emailVerificationTokenCollection}/{verificationToken}";
+
+                // Write EmailVerificationTokenModel to Firestore
+                await _firestoreService.SetDocumentByFirestorePath(
+                    firestoreEmailVerificationTokenDocumentPath, tokenModel);
             }
             // Log error
             catch (Exception exception)
