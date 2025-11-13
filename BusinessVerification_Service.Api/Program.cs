@@ -24,6 +24,31 @@ namespace BusinessVerification_Service.Api
 
             try
             {
+                // Get service information from environemnt variable SERVICE_INFORMATION
+                //
+                // Else retrieve the Google credentials from the file reference
+                // in appsettings.Development.json
+                string serviceInformationPath = Environment.GetEnvironmentVariable("SERVICE_INFORMATION")
+                    ?? builder.Configuration["Service:ServiceInformationPath"];
+                if (File.Exists(serviceInformationPath))
+                {
+                    string serviceInformationContent = await File.ReadAllTextAsync(serviceInformationPath);
+                    ServiceInformationModel serviceInformation = JsonSerializer
+                        .Deserialize<ServiceInformationModel>(serviceInformationContent);
+                    builder.Services.AddSingleton(serviceInformation);
+                }
+                Console.WriteLine($"Startup: Successfully retrieved service information.");
+            }
+            catch (Exception exception)
+            {
+                // Stop the program if the service information cannot be loaded
+                Console.WriteLine($"Startup: Failed to retrieve service information: " +
+                    $"{exception.Message}");
+                throw;
+            }
+
+            try
+            {
                 // Get email settings from environemnt variable EMAIL_SETTINGS
                 //
                 // Else retrieve the Google credentials from the file reference
@@ -33,8 +58,8 @@ namespace BusinessVerification_Service.Api
                 if (File.Exists(emailSettingsPath))
                 {
                     string emailSettingsContent = await File.ReadAllTextAsync(emailSettingsPath);
-                    EmailSettingsModel emailSettings = JsonSerializer.Deserialize<EmailSettingsModel>(
-                        emailSettingsContent);
+                    EmailSettingsModel emailSettings = JsonSerializer
+                        .Deserialize<EmailSettingsModel>(emailSettingsContent);
                     builder.Services.AddSingleton(emailSettings);
                 }
                 Console.WriteLine($"Startup: Successfully retrieved email settings.");
