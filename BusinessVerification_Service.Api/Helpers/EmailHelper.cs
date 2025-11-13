@@ -16,11 +16,10 @@ namespace BusinessVerification_Service.Api.Helpers
         }
 
         // Returns a string of HTML
-        public string BuildVerificationEmailHtml(string businessName, string verificationLink)
+        public string BuildVerificationEmailHtml(string name, string verificationLink)
         {
             // Escape HTML in case user-provided values contain unsafe characters
-            string safeBusinessName = System.Net.WebUtility.HtmlEncode(businessName
-                ?? "Business");
+            string safeName = System.Net.WebUtility.HtmlEncode(name ?? "EngagePoint user");
 
             // HTML string with variables
             return $@"
@@ -37,24 +36,24 @@ namespace BusinessVerification_Service.Api.Helpers
                             <td align='center'>
                                 <table style='max-width: 600px; background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,0.1);'>
                                     <tr>
-                                        <td style='background-color: #0059ff; color: #ffffff; text-align: center; padding: 20px 0;'>
+                                        <td style='background-color: #673AB7; color: #ffffff; text-align: center; padding: 20px 0;'>
                                             <h2 style='margin: 0;'>EngagePoint</h2>
                                         </td>
                                     </tr>
                                     <tr>
                                         <td style='padding: 30px; color: #333333;'>
                                             <h3 style='margin-top: 0;'>Verify your email address</h3>
-                                            <p>Hi there <strong>{safeBusinessName}</strong> &#128075;</p>
-                                            <p>Thank you for using with EngagePoint. To verify your email address, please click the button below:</p>
+                                            <p>Hi there <strong>{safeName}</strong> &#128075;</p>
+                                            <p>Thank you for using EngagePoint. To verify your account email address, please click the button below:</p>
 
                                             <p style='text-align: center; margin: 30px 0;'>
                                                 <a href='{verificationLink}' 
-                                                style='background-color: #0059ff; color: white; text-decoration: none; padding: 12px 24px; border-radius: 6px; display: inline-block;'>
+                                                style='background-color: #673AB7; color: white; text-decoration: none; padding: 12px 24px; border-radius: 6px; display: inline-block;'>
                                                 Verify Email
                                                 </a>
                                             </p>
 
-                                            <p>If you didn’t request this, you can safely ignore this email — your account won’t be affected.</p>
+                                            <p>If you didn’t request this, you can safely ignore this email. Your account won’t be affected.</p>
 
                                             <p style='margin-top: 30px; font-size: 12px; color: #888;'>This link will expire in 24 hours.</p>
                                         </td>

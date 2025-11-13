@@ -23,7 +23,7 @@ namespace BusinessVerification_Service.Test.ServicesTests
         {
             return new BusinessVerificationService(_domainParser,
                 // // Other service dependencies are not needed for this test
-                null, null, null, null, null
+                null, null, null, null, null, null
             );
         }
 

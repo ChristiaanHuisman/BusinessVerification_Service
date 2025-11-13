@@ -59,7 +59,7 @@ namespace BusinessVerification_Service.Api.Services
                     userModel.name, verificationLink);
 
                 // Send email via SMTP
-                await _emailHelper.SendEmailSmtp(userModel.email,userModel.name,
+                await _emailHelper.SendEmailSmtp(userModel.email, userModel.name,
                     emailSubject, emailHtml);
 
                 // Get relevant Firebase document paths

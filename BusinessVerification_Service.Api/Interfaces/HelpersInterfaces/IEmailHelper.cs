@@ -3,7 +3,7 @@
     // Include methods from the helper
     public interface IEmailHelper
     {
-        string BuildVerificationEmailHtml(string businessName, string verificationLink);
+        string BuildVerificationEmailHtml(string name, string verificationLink);
 
         Task SendEmailSmtp(string recipientEmail, string recipientName,
             string emailSubject, string htmlContent);
