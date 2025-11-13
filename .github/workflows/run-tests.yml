@@ -31,4 +31,4 @@ jobs:
 
       # Step 5: Run xUnit tests
       - name: Run tests
-        run: dotnet test --no-build --verbosity normal
+        run: dotnet test BusinessVerification_Service.Test/BusinessVerification_Service.Test.csproj --no-build --verbosity normal
