@@ -1,14 +1,26 @@
 ﻿using BusinessVerification_Service.Api.Interfaces.HelpersInterfaces;
+using BusinessVerification_Service.Api.Models;
+using MimeKit;
 
 namespace BusinessVerification_Service.Api.Helpers
 {
     public class EmailHelper : IEmailHelper
     {
+        // Inject dependencies
+        private readonly EmailSettingsModel _emailSettingsModel;
+
+        // Constructor for dependency injection
+        public EmailHelper(EmailSettingsModel emailSettingsModel)
+        {
+            _emailSettingsModel = emailSettingsModel;
+        }
+
         // Returns a string of HTML
         public string BuildVerificationEmailHtml(string businessName, string verificationLink)
         {
             // Escape HTML in case user-provided values contain unsafe characters
-            string safeBusinessName = System.Net.WebUtility.HtmlEncode(businessName ?? "Business");
+            string safeBusinessName = System.Net.WebUtility.HtmlEncode(businessName
+                ?? "Business");
 
             // HTML string with variables
             return $@"
@@ -59,6 +71,42 @@ namespace BusinessVerification_Service.Api.Helpers
                 </body>
                 </html>"
             ;
+        }
+
+        // Generic method
+        //
+        // Send verification email using the MailKit NuGet Package, taking the
+        // recipient email, email subject and the HTML content as input
+        //
+        // The method is set as an async Task and not void so that errors
+        // can be propogated correctly
+        public async Task SendEmailSmtp(string recipientEmail, string recipientName,
+            string emailSubject, string htmlContent)
+        {
+            // Build email structure with sender and receiver information and the
+            // email subject and HTML body content
+            MimeMessage message = new();
+            message.From.Add(new MailboxAddress(_emailSettingsModel.senderName,
+                _emailSettingsModel.senderEmail));
+            message.To.Add(new MailboxAddress(recipientName, recipientEmail));
+            message.Subject = emailSubject;
+            message.Body = new TextPart("html")
+            {
+                Text = htmlContent
+            };
+
+            // Set up the SMTP client using sender and receiver information and the
+            // built email structure
+            //
+            // Send the verification email after the sender information has been
+            // athenticated with the SMTP app password
+            using MailKit.Net.Smtp.SmtpClient client = new();
+            await client.ConnectAsync(_emailSettingsModel.smtpServer, _emailSettingsModel.port,
+                MailKit.Security.SecureSocketOptions.StartTls);
+            await client.AuthenticateAsync(_emailSettingsModel.senderEmail,
+                _emailSettingsModel.appPassword);
+            await client.SendAsync(message);
+            await client.DisconnectAsync(true);
         }
     }
 }

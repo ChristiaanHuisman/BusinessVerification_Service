@@ -48,9 +48,12 @@ namespace BusinessVerification_Service.Api.Services
 
                 // Build email content
                 string emailSubject = "Verify your EngagePoint account email address";
-                string emailHtml = _emailHelper.BuildVerificationEmailHtml(userModel.name, verificationLink);
+                string emailHtml = _emailHelper.BuildVerificationEmailHtml(
+                    userModel.name, verificationLink);
 
-                // Send email (method)
+                // Send email via SMTP
+                await _emailHelper.SendEmailSmtp(userModel.email,userModel.name,
+                    emailSubject, emailHtml);
 
                 // Write EmailVerificationTokenModel to Firestore (method)
             }
