@@ -5,7 +5,7 @@ using Nager.PublicSuffix;
 
 namespace BusinessVerification_Service.Test.ServicesTests
 {
-    [Trait("Catagory", "BusinessVerificationService Integration Testing")]
+    [Trait("Category", "BusinessVerificationService Integration Testing")]
     public class BusinessVerificationServiceTest : IClassFixture<DomainParserFixture>
     {
         // Injected dependencies
