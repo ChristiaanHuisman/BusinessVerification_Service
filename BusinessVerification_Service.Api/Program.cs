@@ -179,6 +179,7 @@ namespace BusinessVerification_Service.Api
             builder.Services.AddSingleton<IEmailHelper, EmailHelper>();
             builder.Services.AddSingleton<INormalizationAndValidationHelper,
                 NormalizationAndValidationHelper>();
+            builder.Services.AddScoped<IEmailVerificationService, EmailVerificationService>();
             builder.Services.AddScoped<IBusinessVerificationService,
                 BusinessVerificationService>();
 
@@ -223,6 +224,7 @@ namespace BusinessVerification_Service.Api
             });
 
             app.MapControllers();
+
             app.Run();
         }
     }

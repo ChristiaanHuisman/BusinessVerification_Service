@@ -4,7 +4,7 @@ using BusinessVerification_Service.Api.Models;
 
 namespace BusinessVerification_Service.Api.Services
 {
-    public class EmailVerificationService
+    public class EmailVerificationService : IEmailVerificationService
     {
         // Inject dependencies
         private readonly string _baseUrl;
