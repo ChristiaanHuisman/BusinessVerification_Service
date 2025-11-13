@@ -8,13 +8,16 @@ namespace BusinessVerification_Service.Api.Services
         // Inject dependencies
         private readonly string _baseUrl;
         private readonly ITokenGeneratorHelper _tokenGeneratorHelper;
+        private readonly IEmailHelper _emailHelper;
 
         // Constructor for dependency injection
         public EmailVerificationService(ServiceInformationModel serviceInformationModel,
-            ITokenGeneratorHelper tokenGeneratorHelper)
+            ITokenGeneratorHelper tokenGeneratorHelper,
+            IEmailHelper emailHelper)
         {
             _baseUrl = serviceInformationModel.baseUrl;
             _tokenGeneratorHelper = tokenGeneratorHelper;
+            _emailHelper = emailHelper;
         }
 
         // Process of sending a verification email upon request, receives a UserModel
@@ -22,7 +25,7 @@ namespace BusinessVerification_Service.Api.Services
         //
         // The method is set as an async Task and not void so that errors
         // can be propogated correctly
-        public async Task SendVerificationEmailProcess(UserModel user, string userId)
+        public async Task SendVerificationEmailProcess(UserModel userModel, string userId)
         {
             // Try catch wrapper
             try
@@ -31,7 +34,7 @@ namespace BusinessVerification_Service.Api.Services
                 EmailVerificationTokenModel tokenModel = new()
                 {
                     userId = userId,
-                    email = user.email,
+                    email = userModel.email,
                     createdAt = DateTime.UtcNow,
                     expiresAt = DateTime.UtcNow.AddHours(24)
                 };
@@ -43,7 +46,9 @@ namespace BusinessVerification_Service.Api.Services
                 string verificationLink =
                     $"{_baseUrl}/api/EmailVerification/verify-email?verificationToken={verificationToken}";
 
-                // Build email (method)
+                // Build email content
+                string emailSubject = "Verify your EngagePoint account email address";
+                string emailHtml = _emailHelper.BuildVerificationEmailHtml(userModel.name, verificationLink);
 
                 // Send email (method)
 
