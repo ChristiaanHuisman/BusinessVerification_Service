@@ -18,12 +18,14 @@ namespace BusinessVerification_Service.Api.Services
         private readonly IFirestoreService _firestoreService;
         private readonly INormalizationAndValidationHelper
             _normalizationAndValidationHelper;
+        private readonly IEmailVerificationService _emailVerificationService;
 
         // Constructor for dependency injection
         public BusinessVerificationService(IDomainParser domainParser,
             IFirebaseHelper firebaseHelper, IDomainNameHelper domainNameHelper,
             IWebsiteAddressHelper websiteAddressHelper, IFirestoreService firestoreService,
-            INormalizationAndValidationHelper normalizationAndValidationHelper)
+            INormalizationAndValidationHelper normalizationAndValidationHelper,
+            IEmailVerificationService emailVerificationService)
         {
             _domainParser = domainParser;
             _firebaseHelper = firebaseHelper;
@@ -31,6 +33,7 @@ namespace BusinessVerification_Service.Api.Services
             _websiteAddressHelper = websiteAddressHelper;
             _firestoreService = firestoreService;
             _normalizationAndValidationHelper = normalizationAndValidationHelper;
+            _emailVerificationService = emailVerificationService;
         }
 
         // Standard error message ending for displaying user error messages
@@ -257,12 +260,7 @@ namespace BusinessVerification_Service.Api.Services
                         }
                         else
                         {
-                            // Call method to trigger the email verification process
-                            //
-                            // This process is not implemented yet, as using a free domain to
-                            // send transactional emails reliably needs a bit of a
-                            // workaround, but it does seem possible in ASP.NET Core
-
+                            await _emailVerificationService.SendVerificationEmailProcess(userModel, userId);
                             userModel.verificationStatus = userVerificationStatus.pendingEmail;
                             businessVerificationModel.SetVerificationStatus(userModel);
                         }
@@ -277,12 +275,7 @@ namespace BusinessVerification_Service.Api.Services
                         }
                         else
                         {
-                            // Call method to trigger the email verification process
-                            //
-                            // This process is not implemented yet, as using a free domain to
-                            // send transactional emails reliably needs a bit of a
-                            // workaround, but it does seem possible in ASP.NET Core
-
+                            await _emailVerificationService.SendVerificationEmailProcess(userModel, userId);
                             userModel.verificationStatus = userVerificationStatus.pendingEmail;
                             businessVerificationModel.SetVerificationStatus(userModel);
                         }
@@ -337,11 +330,12 @@ namespace BusinessVerification_Service.Api.Services
                 return responseDto;
             }
             // Handle unexpected errors gracefully
-            catch
+            catch (Exception exception)
             {
                 // Returning a response
                 responseDto.message = $"An unexpected error occured during your " +
                     $"business verification request process. {errorMessageEnd}";
+                Console.WriteLine($"Failed process business verification: {exception.Message}");
                 return responseDto;
             }
         }
