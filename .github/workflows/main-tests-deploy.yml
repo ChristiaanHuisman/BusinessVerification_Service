@@ -65,13 +65,11 @@ jobs:
 
       - name: Generate .env file
         run: |
-          cat <<EOF > .env
-SERVICE_INFORMATION=/app/secrets/engagepoint-serviceinfo.json
-EMAIL_SETTINGS=/app/secrets/engagepoint-email-smtpsettings.json
-GOOGLE_APPLICATION_CREDENTIALS=/app/secrets/engagepoint-firebase-adminsdk.json
-FIREBASE_PROJECT_ID=engagepoint-a2c47
-ASPNETCORE_ENVIRONMENT=Development
-EOF
+          echo "SERVICE_INFORMATION=/app/secrets/engagepoint-serviceinfo.json" > .env
+          echo "EMAIL_SETTINGS=/app/secrets/engagepoint-email-smtpsettings.json" >> .env
+          echo "GOOGLE_APPLICATION_CREDENTIALS=/app/secrets/engagepoint-firebase-adminsdk.json" >> .env
+          echo "FIREBASE_PROJECT_ID=engagepoint-a2c47" >> .env
+          echo "ASPNETCORE_ENVIRONMENT=Development" >> .env
 
       - name: Run container locally to verify
         run: |
