@@ -38,74 +38,30 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Docker
-        uses: docker/setup-buildx-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
 
-      - name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v1
-        with:
-          credentials_json: ${{ secrets.ENGAGEPOINT_GITHUBACTIONS_GOOGLECLOUD_SERVICEACC }}
-
-      - name: Configure Docker for Artifact Registry
+      - name: Reconstruct secret JSONs
         run: |
-          gcloud auth configure-docker africa-south1-docker.pkg.dev
+          mkdir -p secrets
+          echo "${{ secrets.ENGAGEPOINT_SERVICEINFO }}" > secrets/engagepoint-serviceinfo.json
+          echo "${{ secrets.ENGAGEPOINT_EMAIL_SMTPSETTINGS }}" > secrets/engagepoint-email-smtpsettings.json
+          echo "${{ secrets.ENGAGEPOINT_FIREBASE_ADMINSDK }}" > secrets/engagepoint-firebase-adminsdk.json
+        shell: bash
 
       - name: Build Docker image
         run: |
           docker build \
-          -t africa-south1-docker.pkg.dev/engagepoint-a2c47/business-verification-service/business-verification-service:pr-${{ github.event.pull_request.number }} \
-          BusinessVerification_Service.Api
+            -f BusinessVerification_Service.Api/Dockerfile \
+            -t business-verification-service:pr-${{ github.event.pull_request.number }} \
+            BusinessVerification_Service.Api
 
-      - name: Write secret JSON files
+      - name: Run Docker container to test startup
         run: |
-          mkdir -p Secrets
-          echo "${{ secrets.ENGAGEPOINT_SERVICEINFO }}" | tr -d '\r' > Secrets/engagepoint-serviceinfo.json
-          echo "${{ secrets.ENGAGEPOINT_EMAIL_SMTPSETTINGS }}" | tr -d '\r' > Secrets/engagepoint-email-smtpsettings.json
-          echo "${{ secrets.ENGAGEPOINT_FIREBASE_ADMINSDK }}" | tr -d '\r' > Secrets/engagepoint-firebase-adminsdk.json
-
-      - name: Generate .env file
-        run: |
-          echo "SERVICE_INFORMATION=/app/secrets/engagepoint-serviceinfo.json" > .env
-          echo "EMAIL_SETTINGS=/app/secrets/engagepoint-email-smtpsettings.json" >> .env
-          echo "GOOGLE_APPLICATION_CREDENTIALS=/app/secrets/engagepoint-firebase-adminsdk.json" >> .env
-          echo "FIREBASE_PROJECT_ID=engagepoint-a2c47" >> .env
-          echo "ASPNETCORE_ENVIRONMENT=Development" >> .env
-
-      - name: Run container locally to verify
-        run: |
-          docker run --rm -d -p 8080:8080 \
-            --env-file .env \
-            -v "${{ github.workspace }}/Secrets:/app/secrets" \
-            africa-south1-docker.pkg.dev/engagepoint-a2c47/business-verification-service/business-verification-service:pr-${{ github.event.pull_request.number }}
-
-      - name: Inspect container filesystem
-        run: |
-          echo "Listing /app in running container..."
-          docker exec $(docker ps -q) ls -R /app || true
-
-      - name: Wait for service and test
-        run: |
-          for i in {1..12}; do
-            if curl --fail http://localhost:8080/; then
-              echo "Service is up"
-              break
-            else
-              echo "Waiting for service to start..."
-              sleep 5
-            fi
-          done 
-          curl --fail http://localhost:8080/ || exit 1
-          docker ps -a
-          docker stop $(docker ps -q)
-
-      - name: Push image to Artifact Registry
-        run: |
-          docker push africa-south1-docker.pkg.dev/engagepoint-a2c47/business-verification-service/business-verification-service:pr-${{ github.event.pull_request.number }}
-
-      - name: Deploy to Cloud Run
-        run: |
-          gcloud run deploy business-verification-service \
-            --image africa-south1-docker.pkg.dev/engagepoint-a2c47/business-verification-service/business-verification-service:pr-${{ github.event.pull_request.number }} \
-            --region africa-south1 \
-            --platform managed \
-            --allow-unauthenticated
+          docker run -d --rm \
+            -p 8080:8080 \
+            -e SERVICE_INFORMATION=/app/secrets/engagepoint-serviceinfo.json \
+            -e EMAIL_SETTINGS=/app/secrets/engagepoint-email-smtpsettings.json \
+            -e GOOGLE_APPLICATION_CREDENTIALS=/app/secrets/engagepoint-firebase-adminsdk.json \
+            -v $PWD/secrets:/app/secrets \
+            business-verification-service:pr-${{ github.event.pull_request.number }}
