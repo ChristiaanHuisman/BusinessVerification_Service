@@ -57,10 +57,17 @@ jobs:
           -t africa-south1-docker.pkg.dev/engagepoint-a2c47/business-verification-service/business-verification-service:pr-${{ github.event.pull_request.number }} \
           BusinessVerification_Service.Api
 
-      # Run loop to give the container time to start
       - name: Run container locally to verify
         run: |
           docker run --rm -d -p 8080:8080 africa-south1-docker.pkg.dev/engagepoint-a2c47/business-verification-service/business-verification-service:pr-${{ github.event.pull_request.number }}
+
+      - name: Inspect container filesystem
+        run: |
+          echo "Listing /app in running container..."
+          docker exec $(docker ps -q) ls -R /app || true
+
+      - name: Wait for service and test
+        run: |
           for i in {1..12}; do
             if curl --fail http://localhost:8080/; then
               echo "Service is up"
