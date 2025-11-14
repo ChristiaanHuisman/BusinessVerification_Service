@@ -1,0 +1,84 @@
+name: Code and Container Tests and Deployment
+
+# Trigger this workflow on PRs targeting the 'main' branch
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    name: Build and run xUnit tests for 'main' branch PRs
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Run tests
+        run: dotnet test BusinessVerification_Service.Test/BusinessVerification_Service.Test.csproj --verbosity normal
+
+  # Only run the deploy-container job if build-and-test succeeds
+  deploy-container:
+    name: Build and Deploy Docker Container for 'main' branch PRs
+    runs-on: ubuntu-latest
+    needs: build-and-test
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker
+        uses: docker/setup-buildx-action@v3
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.ENGAGEPOINT_GITHUBACTIONS_GOOGLECLOUD_SERVICEACC }}
+
+      - name: Configure Docker for Artifact Registry
+        run: |
+          gcloud auth configure-docker africa-south1-docker.pkg.dev
+
+      - name: Build Docker image
+        run: |
+          docker build -t africa-south1-docker.pkg.dev/engagepoint-a2c47/business-verification-service/business-verification-service:pr-${{ github.event.pull_request.number }} .
+
+      # Run loop to give the container time to start
+      - name: Run container locally to verify
+        run: |
+          docker run --rm -d -p 8080:8080 africa-south1-docker.pkg.dev/engagepoint-a2c47/business-verification-service/business-verification-service:pr-${{ github.event.pull_request.number }}
+          for i in {1..12}; do
+            if curl --fail http://localhost:8080/; then
+              echo "Service is up"
+              break
+            else
+              echo "Waiting for service to start..."
+              sleep 5
+            fi
+          done 
+          curl --fail http://localhost:8080/ || exit 1
+          docker ps -a
+          docker stop $(docker ps -q)
+
+      - name: Push image to Artifact Registry
+        run: |
+          docker push africa-south1-docker.pkg.dev/engagepoint-a2c47/business-verification-service/business-verification-service:pr-${{ github.event.pull_request.number }}
+
+      - name: Deploy to Cloud Run
+        run: |
+          gcloud run deploy business-verification-service \
+            --image africa-south1-docker.pkg.dev/engagepoint-a2c47/business-verification-service/business-verification-service:pr-${{ github.event.pull_request.number }} \
+            --region africa-south1 \
+            --platform managed \
+            --allow-unauthenticated
