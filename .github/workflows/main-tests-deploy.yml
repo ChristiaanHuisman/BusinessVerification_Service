@@ -58,7 +58,7 @@ jobs:
 
       - name: Run Docker container to test startup
         run: |
-          CONTAINER_ID=$(docker run -d --rm \
+          CONTAINER_ID=$(docker run -d \
             -p 8080:8080 \
             -e SERVICE_INFORMATION=/app/secrets/engagepoint-serviceinfo.json \
             -e EMAIL_SETTINGS=/app/secrets/engagepoint-email-smtpsettings.json \
@@ -74,7 +74,7 @@ jobs:
           # Check the logs for "Startup: Completed." message
           if ! docker logs $CONTAINER_ID 2>&1 | grep -q "Startup: Completed."; then
             echo "Container did not start successfully."
-            docker logs $CONTAINER_ID || true
+            docker logs $CONTAINER_ID
             exit 1
           fi
 
