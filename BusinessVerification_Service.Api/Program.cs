@@ -225,6 +225,8 @@ namespace BusinessVerification_Service.Api
 
             app.MapControllers();
 
+            Console.WriteLine($"Startup: Completed.");
+
             app.Run();
         }
     }
