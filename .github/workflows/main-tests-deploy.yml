@@ -30,7 +30,7 @@ jobs:
 
   # Only run the deploy-container job if build-and-test succeeds
   deploy-container:
-    name: Build and Deploy Docker Container for 'main' branch PRs
+    name: Build and deploy Docker image for 'main' branch PRs
     runs-on: ubuntu-latest
     needs: build-and-test
 
@@ -52,7 +52,10 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t africa-south1-docker.pkg.dev/engagepoint-a2c47/business-verification-service/business-verification-service:pr-${{ github.event.pull_request.number }} .
+          docker build \
+          -f BusinessVerification_Service.Api/Dockerfile \
+          -t africa-south1-docker.pkg.dev/engagepoint-a2c47/business-verification-service/business-verification-service:pr-${{ github.event.pull_request.number }} \
+          BusinessVerification_Service.Api
 
       # Run loop to give the container time to start
       - name: Run container locally to verify
