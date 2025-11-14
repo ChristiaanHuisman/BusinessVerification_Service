@@ -7,7 +7,7 @@ on:
 
 jobs:
   build-and-test:
-    name: Build and run xUnit tests
+    name: Build and run xUnit tests for 'dev' branch PRs
     runs-on: ubuntu-latest
 
     steps:
