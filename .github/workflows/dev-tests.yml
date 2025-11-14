@@ -1,4 +1,4 @@
-name: Run xUnit Tests
+name: Code Tests
 
 # Trigger this workflow on PRs targeting the 'dev' branch
 on:
@@ -7,28 +7,23 @@ on:
 
 jobs:
   build-and-test:
-    name: Build and run tests
+    name: Build and run xUnit tests
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout code
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Step 2: Setup .NET SDK
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
 
-      # Step 3: Restore dependencies
       - name: Restore dependencies
         run: dotnet restore
 
-      # Step 4: Build the project
       - name: Build
         run: dotnet build --configuration Release --no-restore
 
-      # Step 5: Run xUnit tests
       - name: Run tests
         run: dotnet test BusinessVerification_Service.Test/BusinessVerification_Service.Test.csproj --verbosity normal
