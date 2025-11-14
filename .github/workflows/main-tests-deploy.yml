@@ -55,7 +55,7 @@ jobs:
           docker build \
           -f BusinessVerification_Service.Api/Dockerfile \
           -t africa-south1-docker.pkg.dev/engagepoint-a2c47/business-verification-service/business-verification-service:pr-${{ github.event.pull_request.number }} \
-          BusinessVerification_Service.Api
+          .
 
       - name: Run container locally to verify
         run: |
