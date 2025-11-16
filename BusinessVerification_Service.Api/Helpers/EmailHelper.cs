@@ -18,8 +18,8 @@ namespace BusinessVerification_Service.Api.Helpers
         // Returns a string of HTML
         public string BuildVerificationEmailHtml(string name, string verificationLink)
         {
-            // Escape HTML in case user-provided values contain unsafe characters
-            string safeName = System.Net.WebUtility.HtmlEncode(name ?? "EngagePoint user");
+            // Fallback HTML in case user-provided values contain unsafe characters
+            string safeName = System.Net.WebUtility.HtmlEncode(name ?? "EngagePoint User");
 
             // HTML string with variables
             return $@"
