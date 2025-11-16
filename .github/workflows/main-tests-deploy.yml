@@ -44,9 +44,9 @@ jobs:
       - name: Reconstruct secret JSONs
         run: |
           mkdir -p secrets
-          echo "${{ secrets.ENGAGEPOINT_SERVICEINFO }}" > secrets/engagepoint-serviceinfo.json
-          echo "${{ secrets.ENGAGEPOINT_EMAIL_SMTPSETTINGS }}" > secrets/engagepoint-email-smtpsettings.json
-          echo "${{ secrets.ENGAGEPOINT_FIREBASE_ADMINSDK }}" > secrets/engagepoint-firebase-adminsdk.json
+          echo "${{ secrets.ENGAGEPOINT_SERVICEINFO }}" | base64 --decode > secrets/engagepoint-serviceinfo.json
+          echo "${{ secrets.ENGAGEPOINT_EMAIL_SMTPSETTINGS }}" | base64 --decode > secrets/engagepoint-email-smtpsettings.json
+          echo "${{ secrets.ENGAGEPOINT_FIREBASE_ADMINSDK }}" | base64 --decode > secrets/engagepoint-firebase-adminsdk.json
         shell: bash
 
       - name: Build Docker image
@@ -58,10 +58,66 @@ jobs:
 
       - name: Run Docker container to test startup
         run: |
-          docker run -d --rm \
+          CONTAINER_ID=$(docker run -d \
             -p 8080:8080 \
             -e SERVICE_INFORMATION=/app/secrets/engagepoint-serviceinfo.json \
             -e EMAIL_SETTINGS=/app/secrets/engagepoint-email-smtpsettings.json \
             -e GOOGLE_APPLICATION_CREDENTIALS=/app/secrets/engagepoint-firebase-adminsdk.json \
+            -e FIREBASE_PROJECT_ID=${{ secrets.FIREBASE_PROJECT_ID }} \
             -v $PWD/secrets:/app/secrets \
-            business-verification-service:pr-${{ github.event.pull_request.number }}
+            business-verification-service:pr-${{ github.event.pull_request.number }})
+
+          echo "Container started with ID $CONTAINER_ID"
+
+          # Wait a while to see if it crashes
+          sleep 30
+          docker exec $CONTAINER_ID head -c 5 /app/secrets/engagepoint-serviceinfo.json | hexdump -C
+
+          # Check the logs for "Startup: Completed." message
+          if ! docker logs $CONTAINER_ID 2>&1 | grep -q "Startup: Completed."; then
+            echo "Container did not start successfully."
+            docker logs $CONTAINER_ID
+            exit 1
+          fi
+
+          echo "Container is running."
+
+      - name: Check container logs if failure
+        if: failure()
+        run: |
+          echo "Showing container logs after failure..."
+          docker logs $CONTAINER_ID || true
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.ENGAGEPOINT_GITHUBACTIONS_GOOGLECLOUD_SERVICEACC }}
+
+      - name: Configure Docker for Artifact Registry
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: engagepoint-a2c47
+          export_default_credentials: true
+
+      - name: Configure Docker authentication for Artifact Registry
+        run: |
+          gcloud auth configure-docker africa-south1-docker.pkg.dev --quiet
+
+      - name: Tag Docker image
+        run: |
+          docker tag business-verification-service:pr-${{ github.event.pull_request.number }} \
+            africa-south1-docker.pkg.dev/engagepoint-a2c47/business-verification-service/business-verification-service:pr-${{ github.event.pull_request.number }}
+
+      - name: Push Docker image to Artifact Registry
+        run: |
+          docker push africa-south1-docker.pkg.dev/engagepoint-a2c47/business-verification-service/business-verification-service:pr-${{ github.event.pull_request.number }}
+
+      # Deploy to Cloud Run only if the push succeeded
+      - name: Deploy to Cloud Run
+        uses: google-github-actions/deploy-cloudrun@v1
+        with:
+          service: business-verification-service
+          image: africa-south1-docker.pkg.dev/engagepoint-a2c47/business-verification-service/business-verification-service:pr-${{ github.event.pull_request.number }}
+          region: africa-south1
+          allow-unauthenticated: true
+          # Traffic options are optional, new revision gets 100% if the deploy succeeds
