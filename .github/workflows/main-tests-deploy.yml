@@ -70,7 +70,7 @@ jobs:
 
           # Wait a while to see if it crashes
           sleep 30
-          docker exec $CONTAINER_ID cat /app/secrets/engagepoint-serviceinfo.json
+          docker exec $CONTAINER_ID head -c 5 /app/secrets/engagepoint-serviceinfo.json | hexdump -C
 
           # Check the logs for "Startup: Completed." message
           if ! docker logs $CONTAINER_ID 2>&1 | grep -q "Startup: Completed."; then
