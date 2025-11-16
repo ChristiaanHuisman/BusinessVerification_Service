@@ -99,6 +99,10 @@ jobs:
           project_id: engagepoint-a2c47
           export_default_credentials: true
 
+      - name: Configure Docker authentication for Artifact Registry
+        run: |
+          gcloud auth configure-docker africa-south1-docker.pkg.dev --quiet
+
       - name: Tag Docker image
         run: |
           docker tag business-verification-service:pr-${{ github.event.pull_request.number }} \
