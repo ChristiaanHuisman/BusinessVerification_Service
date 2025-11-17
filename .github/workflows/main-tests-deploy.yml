@@ -67,26 +67,25 @@ jobs:
             -v $PWD/secrets:/app/secrets \
             business-verification-service:pr-${{ github.event.pull_request.number }})
 
+          echo "CONTAINER_ID=$CONTAINER_ID" >> $GITHUB_ENV
           echo "Container started with ID $CONTAINER_ID"
 
-          # Wait a while to see if it crashes
+          # Wait 30 seconds to see if it crashes
           sleep 30
+          
+      # Hit the /health endpoint to verify the API is healthy
+      - name: Verify health endpoint
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/health)
 
-          # Check the logs for "Startup: Completed." message
-          if ! docker logs $CONTAINER_ID 2>&1 | grep -q "Startup: Completed."; then
-            echo "Container did not start successfully."
+          if [ "$STATUS" != "200" ]; then
+            echo "Health check failed. Status code: $STATUS"
             docker logs $CONTAINER_ID
             exit 1
           fi
 
-          echo "Container is running."
-
-      - name: Check container logs if failure
-        if: failure()
-        run: |
-          echo "Showing container logs after failure..."
-          docker logs $CONTAINER_ID || true
-
+          echo "Health check passed successfully with status $STATUS"
+      
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v1
         with:
@@ -119,4 +118,5 @@ jobs:
           image: africa-south1-docker.pkg.dev/engagepoint-a2c47/business-verification-service/business-verification-service:pr-${{ github.event.pull_request.number }}
           region: africa-south1
           allow-unauthenticated: true
+          timeout: 60s
           # Traffic options are optional, new revision gets 100% if the deploy succeeds

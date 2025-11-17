@@ -1,6 +1,6 @@
 <h1 align="center">Business Verification Service</h1>
 
-<h1>Detailed Description:</h1>
+<h1>Description:</h1>
 
 <p>This C# ASP.NET Core Web API is my contribution to an education group project. It makes use of xUnit Test, NuGet Packages, Firebase tools, Docker, GitHub Actions and verification emails. The main focus of the project is a mobile app made with Flutter/Dart. It uses Firebase and a few services writen in C#, Java and Python as its backend, and Firestore as its database. I also did the integration of this service with the Flutter app and Firebase and I deployed it to Cloud Run. Visual Studio and Android Studio were used to develop my contributions.</p>
 
@@ -16,4 +16,4 @@
 
 <h1>Notes:</h1>
 
-<p>I am truly sorry to anyone that is going through the Pull Requests from the 'feature/EmailVerification' branch into the 'dev' branch and it's corresponding commits. I was struggling to get the testing and deploying of the Docker image through GitHub Actions working so that I can safely create and merge Pull Requests from 'dev' into 'main'. I wanted to ensure the CI/CD pipeline worked as expected before I developed the microservice further.</p>
+<p>I am truly sorry to anyone that is going through all the Pull Requests from the 'feature/EmailVerification' branch into the 'dev' branch and it's corresponding commits. I was struggling to get the testing and deploying of the Docker image through GitHub Actions working so that I can safely create and merge Pull Requests from 'dev' into 'main'. I wanted to ensure the CI/CD pipeline worked as expected before I developed the microservice further.</p>
