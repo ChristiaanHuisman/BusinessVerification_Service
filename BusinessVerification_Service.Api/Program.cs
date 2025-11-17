@@ -229,6 +229,8 @@ namespace BusinessVerification_Service.Api
 
             Console.WriteLine($"Startup: Completed.");
 
+            Console.WriteLine($"Startup: Completed.");
+
             app.Run();
         }
     }
