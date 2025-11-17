@@ -10,6 +10,9 @@ namespace BusinessVerification_Service.Api.Models
         public string? userId { get; set; }
 
         [FirestoreProperty]
+        public string? name { get; set; }
+
+        [FirestoreProperty]
         public string? email { get; set; }
 
         [FirestoreProperty]
@@ -17,5 +20,12 @@ namespace BusinessVerification_Service.Api.Models
 
         [FirestoreProperty]
         public DateTime? expiresAt { get; set; }
+
+        // Helper methods
+        public void SetTokenTimestamps()
+        {
+            createdAt = DateTime.UtcNow;
+            expiresAt = createdAt.Value.AddHours(24);
+        }
     }
 }

@@ -5,7 +5,5 @@
     public class BusinessVerificationResponseDto
     {
         public string? message { get; set; }
-
-        public bool reSendVerificationEmail { get; set; } = false;
     }
 }
