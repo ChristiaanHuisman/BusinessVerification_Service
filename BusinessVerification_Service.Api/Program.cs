@@ -186,6 +186,7 @@ namespace BusinessVerification_Service.Api
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+            builder.Services.AddHealthChecks();
 
             // Enable CORS
             builder.Services.AddCors(options =>
@@ -224,6 +225,7 @@ namespace BusinessVerification_Service.Api
             });
 
             app.MapControllers();
+            app.MapHealthChecks("/health");
 
             Console.WriteLine($"Startup: Completed.");
 
