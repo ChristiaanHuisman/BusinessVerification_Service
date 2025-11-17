@@ -2,18 +2,10 @@
 
 namespace BusinessVerification_Service.Api.Models
 {
-    // Model representing businessVerification document from Firestore
+    // Model representing partial businessVerification document from Firestore
     [FirestoreData]
-    public class BusinessVerificationModel
+    public class BusinessVerificationEmailVerificationUpdateModel
     {
-        public BusinessVerificationModel() { }
-
-        [FirestoreProperty]
-        public int attemptNumber { get; set; } = 0;
-
-        [FirestoreProperty]
-        public bool? errorOccured { get; set; }
-
         [FirestoreProperty]
         public bool? emailVerified { get; set; }
 
@@ -25,29 +17,18 @@ namespace BusinessVerification_Service.Api.Models
         ;
 
         [FirestoreProperty]
-        public int? fuzzyScore { get; set; }
-
-        [FirestoreProperty]
-        public DateTime? verificationRequestedAt { get; set; }
-
-        [FirestoreProperty]
         public DateTime? verificationStatusUpdatedAt { get; set; }
 
         // Helper methods
-        public void SetVerificationStatus(UserModel userModel)
+        public void SetVerificationStatus(UserEmailVerificationUpdateModel userModel)
         {
             verificationStatus = userModel.verificationStatus;
             verificationStatusUpdatedAt = DateTime.UtcNow;
         }
 
-        public void SetEmailVerified(UserModel userModel)
+        public void SetEmailVerified(UserEmailVerificationUpdateModel userModel)
         {
             emailVerified = userModel.emailVerified;
-        }
-
-        public void SetVerificationRequestedAt(UserModel userModel)
-        {
-            verificationRequestedAt = userModel.verificationRequestedAt;
         }
     }
 }

@@ -9,7 +9,7 @@ namespace BusinessVerification_Service.Api.Services
         private readonly FirestoreDb _firestoreDb;
 
         // Constructor for dependency injection
-        public FirestoreService (FirestoreDb firestoreDb)
+        public FirestoreService(FirestoreDb firestoreDb)
         {
             _firestoreDb = firestoreDb;
         }
@@ -55,6 +55,18 @@ namespace BusinessVerification_Service.Api.Services
             // do not remove other fields
             DocumentReference documentReference = _firestoreDb.Document(documentPath);
             await documentReference.SetAsync(document, SetOptions.MergeAll);
+        }
+
+        // Generic method
+        //
+        // Need to carefully specify path to document when calling the method
+        //
+        // Delete relevant document specified from Firestore collection
+        public async Task DeleteDocumentFromFirestore(string documentPath)
+        {
+            // Get a reference to the specified Firestore document and delete it
+            DocumentReference documentReference = _firestoreDb.Document(documentPath);
+            await documentReference.DeleteAsync();
         }
 
         // Generic method

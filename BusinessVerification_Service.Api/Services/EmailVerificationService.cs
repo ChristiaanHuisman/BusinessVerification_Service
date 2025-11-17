@@ -32,7 +32,7 @@ namespace BusinessVerification_Service.Api.Services
         //
         // The method is set as an async Task and not void so that errors
         // can be propogated correctly
-        public async Task SendVerificationEmailProcess(UserModel userModel, string userId)
+        public async Task SendVerificationEmailProcess(UserModel userModel, string userId) // Nullable + add tokenModel
         {
             // Try catch wrapper
             try
