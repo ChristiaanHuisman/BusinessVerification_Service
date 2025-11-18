@@ -36,7 +36,7 @@ namespace BusinessVerification_Service.Api.Services
             _emailVerificationService = emailVerificationService;
         }
 
-        // Standard error message ending for displaying user error messages
+        // Standard respnose messages
         const string errorMessageEnd = "Please ensure all account details are correct " +
             "and try again in a few minutes, contact support if the issue persists.";
 
@@ -91,8 +91,7 @@ namespace BusinessVerification_Service.Api.Services
             try
             {
                 // Remove tag or set as null
-                string? authorizationToken = authorizationHeader?
-                    .Trim().Replace("Bearer ", "");
+                string? authorizationToken = authorizationHeader?.Trim().Replace("Bearer ", "");
                 if (string.IsNullOrWhiteSpace(authorizationToken))
                 {
                     // Returning a response
@@ -260,7 +259,7 @@ namespace BusinessVerification_Service.Api.Services
                         }
                         else
                         {
-                            await _emailVerificationService.SendVerificationEmailProcess(userModel, userId);
+                            await _emailVerificationService.NewVerificationEmail(userModel, userId);
                             userModel.verificationStatus = userVerificationStatus.pendingEmail;
                             businessVerificationModel.SetVerificationStatus(userModel);
                         }
@@ -275,7 +274,7 @@ namespace BusinessVerification_Service.Api.Services
                         }
                         else
                         {
-                            await _emailVerificationService.SendVerificationEmailProcess(userModel, userId);
+                            await _emailVerificationService.NewVerificationEmail(userModel, userId);
                             userModel.verificationStatus = userVerificationStatus.pendingEmail;
                             businessVerificationModel.SetVerificationStatus(userModel);
                         }
