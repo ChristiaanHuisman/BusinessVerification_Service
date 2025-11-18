@@ -224,10 +224,11 @@ namespace BusinessVerification_Service.Api
                 await next();
             });
 
+            // Serve static files from wwwroot
+            app.UseStaticFiles();
+
             app.MapControllers();
             app.MapHealthChecks("/health");
-
-            Console.WriteLine($"Startup: Completed.");
 
             Console.WriteLine($"Startup: Completed.");
 
