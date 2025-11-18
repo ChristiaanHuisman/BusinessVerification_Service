@@ -1,4 +1,5 @@
-﻿using BusinessVerification_Service.Api.Models;
+﻿using BusinessVerification_Service.Api.Dtos;
+using BusinessVerification_Service.Api.Models;
 
 namespace BusinessVerification_Service.Api.Interfaces.ServicesInterfaces
 {
@@ -11,5 +12,8 @@ namespace BusinessVerification_Service.Api.Interfaces.ServicesInterfaces
             string oldToken);
 
         Task SendVerificationEmailProcess(EmailVerificationTokenModel tokenModel);
+
+        Task<BusinessVerificationResponseDto> VerifyEmailVerificaitonToken(
+            string? verificationToken);
     }
 }

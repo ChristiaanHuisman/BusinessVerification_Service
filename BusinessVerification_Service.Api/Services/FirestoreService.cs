@@ -71,6 +71,31 @@ namespace BusinessVerification_Service.Api.Services
 
         // Generic method
         //
+        // Need to specify collection name, field name, and field value of the desired
+        // deleted documents when calling this method
+        //
+        // Delete relevant Firestore documents by qury from a specified field
+        public async Task DeleteDocumentsFromCollectionByField(string collectionName,
+            string fieldName, string fieldValue)
+        {
+            // Get all document snapshots from collection that match the query
+            CollectionReference collectionReference = _firestoreDb.Collection(collectionName);
+            Query query = collectionReference.WhereEqualTo(fieldName, fieldValue);
+            QuerySnapshot querySnapshot = await query.GetSnapshotAsync();
+
+            // Add all documents delete tasks
+            List<Task> deleteTasks = [];
+            foreach (DocumentSnapshot documentSnapshot in querySnapshot.Documents)
+            {
+                deleteTasks.Add(documentSnapshot.Reference.DeleteAsync());
+            }
+
+            // Delete all documents concurrently
+            await Task.WhenAll(deleteTasks);
+        }
+
+        // Generic method
+        //
         // For successful conversion between model enums and Firestore strings
         //
         // Converter that tells Firestore how to store and read enums as strings

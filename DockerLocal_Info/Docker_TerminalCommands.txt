@@ -1,0 +1,15 @@
+Remeber to put your own .env with all relevant information inside BusinessVerification_Service.Api
+
+IN REPOSITORY TERMINAL
+cd BusinessVerification_Service.Api (go to directory containing the Dockerfile)
+docker build -t business-verification-service . (build image)
+docker run --rm -it -p 8080:8080 --env-file .env -v "(local path to secrets):/app/secrets" business-verification-service (run container)
+ctrl c (stop container)
+cd .. (go back to repository root)
+
+IN SHELL
+Invoke-WebRequest http://localhost:8080/health (health check for running container)
+
+IN BROWSER
+http://localhost:8080/swagger/index.html (display swagger UI for running container)
+http://localhost:8080/emailVerificationResult.html(add '?msg=' further any valid URL safe text containing 'successful' will be green, anything else will be red) (display static page simulating when the email verification link is clicked for the running container)

@@ -20,15 +20,11 @@ namespace BusinessVerification_Service.Api.Models
         public DateTime? verificationStatusUpdatedAt { get; set; }
 
         // Helper methods
-        public void SetVerificationStatus(UserEmailVerificationUpdateModel userModel)
+        public void SetNewPropertyValues(UserEmailVerificationUpdateModel userUpdateModel)
         {
-            verificationStatus = userModel.verificationStatus;
+            emailVerified = userUpdateModel.emailVerified;
+            verificationStatus = userUpdateModel.verificationStatus;
             verificationStatusUpdatedAt = DateTime.UtcNow;
-        }
-
-        public void SetEmailVerified(UserEmailVerificationUpdateModel userModel)
-        {
-            emailVerified = userModel.emailVerified;
         }
     }
 }

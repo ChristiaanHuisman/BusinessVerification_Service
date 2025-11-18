@@ -36,7 +36,7 @@ namespace BusinessVerification_Service.Api.Services
             _emailVerificationService = emailVerificationService;
         }
 
-        // Standard error message ending for displaying user error messages
+        // Standard respnose messages
         const string errorMessageEnd = "Please ensure all account details are correct " +
             "and try again in a few minutes, contact support if the issue persists.";
 
