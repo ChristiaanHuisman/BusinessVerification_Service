@@ -2,7 +2,7 @@
 
 <h2>Description:</h2>
 
-<p>This C# ASP.NET Core Web API is my contribution to an education group project. It makes use of xUnit Test, NuGet Packages, Firebase tools, Docker, GitHub Actions and verification emails. The main focus of the project is a mobile app made with Flutter/Dart. It uses Firebase and a few services writen in C#, Java and Python as its backend, and Firestore as its database. I also did the integration of this service with the Flutter app and Firebase and I deployed it to Cloud Run. Visual Studio and Android Studio were used to develop my contributions.</p>
+<p>This C# ASP.NET Core Web API is my contribution to an academic group project. It makes use of xUnit Test, NuGet Packages, Firebase tools, Docker, GitHub Actions and verification emails. The main focus of the project is a mobile app made with Flutter/Dart. It uses Firebase and a few services writen in C#, Java and Python as its backend, and Firestore as its database. I also did the integration of this service with the Flutter app and Firebase and I deployed it to Cloud Run. Visual Studio and Android Studio were used to develop my contributions.</p>
 
 <p>This specific service focuses on comparing email and website address domains and then comparing those with business names to determine if the business requesting verification is a legit business. To do this the service receives a token from the Flutter app of the currently logged in user, with that token it authenticates that it is a valid user making the request from Firebase and retrives that user's relevant information from Firestore. It validates and normalizes the data and then performs the comparisons using the Nager.PublicSuffix and FuzzySharp NuGet Packages. After which it returns a response message to the Flutter app and writes the relevant information back into Firestore.</p>
 
@@ -13,6 +13,11 @@
 <p>For the Flutter mobile app integration with this microservice I simply needed the URL that Cloud Run provided me with when hosting the Docker image and any endpoint paths in the microservice that need to be called. In the Dart code all the necessary imports were done and a function was written to call the relevant microservice endpoint with the capacity to receive any information that might be returned from the microservice. When the mobile app calls the microservice enpoint it also includes the currently logged in user's Firebase authentication token so that the microservice can authenticate the request and retrieve any data it might need from the user. I also did the styling of the input and output methods in the Dart files that are related to this microservice myself, with provisions for when the response might timeout and for other unexpected cases to make it user friendly and stylish.</p>
 
 <p>All of this was done with free resources.</p>
+
+<h2>Links:</h2>
+
+* [Whole group project repository](https://github.com/ChristiaanHuisman/EngagePoint_ITMDA_GroupS11)
+* [Flutter mobile application visual functionality](https://github.com/Lewcak/EngagePoint-Project-Showcase)
 
 <h2>Notes:</h2>
 
