@@ -1,6 +1,5 @@
 // This is only for:
-// Functions called by the admin page that has to do with the business verification process
-// Listening for updates to specific fields in Firestore and then updating other fields based on those updates
+// Methods called by the admin page that has to do with the business verification process
 // Thus, necessary imports and class definitions are assumed to be present in the actual file
 // There is also a function for displaying a verified badge anywhare a verified business name is displayed, but that is not included here
 

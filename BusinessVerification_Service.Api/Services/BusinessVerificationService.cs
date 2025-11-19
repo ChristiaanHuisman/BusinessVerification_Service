@@ -227,6 +227,18 @@ namespace BusinessVerification_Service.Api.Services
                     return responseDto;
                 }
 
+                // Check if the top level domain is in the public suffix list
+                if (string.IsNullOrWhiteSpace(parsedEmailDomain?.topLevelDomain)
+                    || string.IsNullOrWhiteSpace(parsedWebsiteDomain?.topLevelDomain))
+                {
+                    // Execute writing to Firestore documents and returning a response
+                    responseDto.message = $"Top level domain not recognized. {errorMessageEnd}";
+                    await _firestoreService.SetDocumentByFirestorePath(firestoreUserDocumentPath, userModel);
+                    await _firestoreService.SetDocumentByFirestorePath(
+                        firestoreBusinessVerificationDocumentPath, businessVerificationModel);
+                    return responseDto;
+                }
+
                 // Use parsed domain information to check if email and website domains match
                 if (parsedEmailDomain.registrableDomain != parsedWebsiteDomain.registrableDomain)
                 {
